@@ -6,6 +6,7 @@ dependencies {
 
   compile externalDependency.elasticSearchRest
   compile externalDependency.gson
+  compile externalDependency.httpClient
   compile externalDependency.kafkaClients
   compile externalDependency.kafkaAvroSerde
   compile externalDependency.lombok
