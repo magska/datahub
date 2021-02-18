@@ -42,7 +42,7 @@ public class DefaultRestliClientFactory {
 
   @Nonnull
   public static RestClient getRestLiClient(@Nonnull String restLiServerHost, int restLiServerPort) {
-    return getRestLiClient(restLiServerHost,restLiServerPort, false, null);
+    return getRestLiClient(restLiServerHost, restLiServerPort, false, null);
   }
 
   @Nonnull
@@ -64,7 +64,7 @@ public class DefaultRestliClientFactory {
 
 
     HttpClientFactory factory = new HttpClientFactory.Builder().build();
-    Map<String,Object> params = new HashMap<>();
+    Map<String, Object> params = new HashMap<>();
     SSLParameters sslParameters = new SSLParameters();
     if (sslProtocol != null) {
       sslParameters.setProtocols(new String[]{sslProtocol});
