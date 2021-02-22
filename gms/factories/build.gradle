@@ -3,6 +3,7 @@ apply plugin: 'java'
 dependencies {
   compile project(':gms:impl')
   compile project(':metadata-dao-impl:kafka-producer')
+  compile project(':metadata-utils')
 
   compile externalDependency.elasticSearchRest
   compile externalDependency.gson
