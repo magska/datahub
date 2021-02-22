@@ -1,4 +1,4 @@
-package com.linkedin.gms.factory.common;
+package com.linkedin.metadata.utils.elasticsearch;
 
 import java.io.FileInputStream;
 import java.io.IOException;

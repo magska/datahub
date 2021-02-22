@@ -19,47 +19,22 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.threadpool.ThreadPool;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 @Slf4j
 public class ElasticsearchConnector {
 
-  private RestClient _restClient;
-  private RestHighLevelClient _client;
-
-  private Integer _esPort;
-  private String[] _esHosts;
-  private Integer _threadCount;
-
   private BulkProcessor _bulkProcessor;
-  private Integer _bulkRequestsLimit;
-  private Integer _bulkFlushPeriod;
   private static final int DEFAULT_NUMBER_OF_RETRIES = 3; // TODO: Test and also add these into config
   private static final long DEFAULT_RETRY_INTERVAL = 1L;
 
-  public ElasticsearchConnector(List<String> hosts, Integer port, Integer threadCount, Integer bulkRequestsLimit,
-      Integer bulkFlushPeriod) {
 
-    _esPort = port;
-    _esHosts = hosts.toArray(new String[0]);
-    _threadCount = threadCount;
-    _bulkRequestsLimit = bulkRequestsLimit;
-    _bulkFlushPeriod = bulkFlushPeriod;
-
-    initClient();
-    initBulkProcessor();
+  public ElasticsearchConnector(RestHighLevelClient elasticSearchRestClient, Integer bulkRequestsLimit,
+                                Integer bulkFlushPeriod) {
+    initBulkProcessor(elasticSearchRestClient, bulkRequestsLimit, bulkFlushPeriod);
   }
 
-  private void initClient() {
-    try {
-      _restClient = loadRestHttpClient(_esHosts, _esPort, _threadCount);
-      _client = new RestHighLevelClient(_restClient);
-    } catch (Exception ex) {
-      log.error("Error: RestClient is not properly initialized. " + ex.toString());
-    }
-  }
-
-  private void initBulkProcessor() {
+  private void initBulkProcessor(RestHighLevelClient elasticSearchRestClient, Integer bulkRequestsLimit,
+                                 Integer bulkFlushPeriod) {
     BulkProcessor.Listener listener = new BulkProcessor.Listener() {
       @Override
       public void beforeBulk(long executionId, BulkRequest request) {
@@ -80,8 +55,8 @@ public class ElasticsearchConnector {
 
     ThreadPool threadPool = new ThreadPool(Settings.builder().put(Settings.EMPTY).build());
     _bulkProcessor =
-        new BulkProcessor.Builder(_client::bulkAsync, listener, threadPool).setBulkActions(_bulkRequestsLimit)
-            .setFlushInterval(TimeValue.timeValueSeconds(_bulkFlushPeriod))
+        new BulkProcessor.Builder(elasticSearchRestClient::bulkAsync, listener, threadPool).setBulkActions(bulkRequestsLimit)
+            .setFlushInterval(TimeValue.timeValueSeconds(bulkFlushPeriod))
             .setBackoffPolicy(BackoffPolicy.constantBackoff(TimeValue.timeValueSeconds(DEFAULT_RETRY_INTERVAL),
                 DEFAULT_NUMBER_OF_RETRIES))
             .build();
