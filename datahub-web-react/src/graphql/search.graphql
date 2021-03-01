@@ -18,17 +18,14 @@ query getSearchResults($input: SearchInput!) {
                 origin
                 description
                 uri
+                platform {
+                    name
+                }
                 platformNativeType
                 tags
                 properties {
                     key
                     value
-                }
-                created {
-                    time
-                }
-                lastModified {
-                    time
                 }
                 ownership {
                     owners {
@@ -87,12 +84,24 @@ query getSearchResults($input: SearchInput!) {
                     owners {
                         owner {
                             urn
+                            type
+                            username
+                            info {
+                                active
+                                displayName
+                                title
+                                firstName
+                                lastName
+                                fullName
+                            }
+                            editableInfo {
+                                pictureLink
+                            }
                         }
                         type
-                        source {
-                            type
-                            url
-                        }
+                    }
+                    lastModified {
+                        time
                     }
                 }
             }
@@ -115,12 +124,24 @@ query getSearchResults($input: SearchInput!) {
                     owners {
                         owner {
                             urn
+                            type
+                            username
+                            info {
+                                active
+                                displayName
+                                title
+                                firstName
+                                lastName
+                                fullName
+                            }
+                            editableInfo {
+                                pictureLink
+                            }
                         }
                         type
-                        source {
-                            type
-                            url
-                        }
+                    }
+                    lastModified {
+                        time
                     }
                 }
             }

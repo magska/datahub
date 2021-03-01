@@ -5,17 +5,14 @@ fragment nonRecursiveDatasetFields on Dataset {
     origin
     description
     uri
+    platform {
+        name
+    }
     platformNativeType
     tags
     properties {
         key
         value
-    }
-    created {
-        time
-    }
-    lastModified {
-        time
     }
     ownership {
         owners {
@@ -69,13 +66,13 @@ fragment nonRecursiveDatasetFields on Dataset {
             }
         }
         fields {
-        fieldPath
-        jsonPath
-        nullable
-        description
-        type
-        nativeDataType
-        recursive
+            fieldPath
+            jsonPath
+            nullable
+            description
+            type
+            nativeDataType
+            recursive
         }
         primaryKeys
     }

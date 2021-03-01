@@ -190,21 +190,6 @@ type Dataset implements Entity {
     Downstream Lineage metadata of the dataset
     """
     downstreamLineage: DownstreamLineage
-
-    """
-    An AuditStamp corresponding to the creation of this Dataset
-    """
-    created: AuditStamp!
-
-    """
-    An AuditStamp corresponding to the modification of this Dataset
-    """
-    lastModified: AuditStamp!
-
-    """
-    An optional AuditStamp corresponding to the deletion of this Dataset
-    """
-    deleted: AuditStamp
 }
 
 type DataPlatform implements Entity {
@@ -234,6 +219,11 @@ type DataPlatformInfo {
     The Platform Type
     """
     type: PlatformType!
+
+    """
+    Display name associated with the platform
+    """
+    displayName: String
 
     """
     The delimiter in the dataset names on the data platform

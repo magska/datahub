@@ -12,11 +12,11 @@ query getChart($urn: String!) {
                 name
                 origin
                 description
+                platform {
+                    name
+                }
                 platformNativeType
                 tags
-                lastModified {
-                    time
-                }
                 ownership {
                     owners {
                         owner {
