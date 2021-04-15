@@ -1,31 +1,31 @@
 {
     "styles": {
         "border-radius-base": "8px",
-        "layout-header-background": "#333E4C",
-        "layout-header-color": "white",
-        "layout-body-background": "white",
-        "component-background": "white",
-        "body-background": "white",
-        "border-color-base": "#ececec",
+        "layout-header-background": "#000000",
+        "layout-header-color": "#ffb3c7ff",
+        "layout-body-background": "#FFFFFF",
+        "component-background": "#FFFFFF",
+        "body-background": "#FFFFFF",
+        "border-color-base": "black",
         "text-color": "fade(black, 85%)",
         "text-color-secondary": "fade(black, 45%)",
-        "heading-color": "fade(black, 85%)",
-        "background-color-light": "hsv(0, 0, 98%)",
-        "divider-color": "fade(black, 6%)",
-        "disabled-color": "fade(black, 25%)",
-        "steps-nav-arrow-color": "fade(black, 25%)",
-        "homepage-background-upper-fade": "#132935",
+        "heading-color": "black",
+        "background-color-light": "green",
+        "divider-color": "black",
+        "disabled-color": "black",
+        "steps-nav-arrow-color": "black",
+        "homepage-background-upper-fade": "#fa82a3",
         "homepage-background-lower-fade": "#FFFFFF",
-        "box-shadow": "0px 0px 30px 0px rgb(239 239 239)",
-        "box-shadow-hover": "0px 1px 0px 0.5px rgb(239 239 239)"
+        "box-shadow": "0px 0px 30px 0px grey",
+        "box-shadow-hover": "0px 1px 0px 0.5px black"
     },
     "assets": {
-        "logoUrl": "/assets/data_catalog_logo.png"
+        "logoUrl": "/assets/klarna.png"
     },
     "content": {
         "title": "Lakehouse Data Catalog",
         "homepage": {
-            "homepageMessage": "Find data you can count on"
+            "homepageMessage": ""
         },
         "search": {
             "searchbarMessage": "Search Datasets, People, & more..."
