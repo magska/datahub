@@ -14,6 +14,9 @@ query getDashboard($urn: String!) {
                 info {
                     name
                     description
+                    inputs {
+                        urn
+                    }
                 }
                 ownership {
                     owners {
@@ -74,6 +77,105 @@ query getDashboard($urn: String!) {
             }
             lastModified {
                 time
+            }
+        }
+        globalTags {
+            tags {
+                tag {
+                    urn
+                    name
+                    description
+                }
+            }
+        }
+    }
+}
+
+mutation updateDashboard($input: DashboardUpdateInput!) {
+    updateDashboard(input: $input) {
+        urn
+        type
+        tool
+        dashboardId
+        info {
+            name
+            description
+            charts {
+                urn
+                tool
+                type
+                info {
+                    name
+                    description
+                }
+                ownership {
+                    owners {
+                        owner {
+                            urn
+                            type
+                            username
+                            info {
+                                active
+                                displayName
+                                title
+                                email
+                                firstName
+                                lastName
+                                fullName
+                            }
+                            editableInfo {
+                                pictureLink
+                            }
+                        }
+                        type
+                    }
+                    lastModified {
+                        time
+                    }
+                }
+            }
+            url
+            access
+            lastRefreshed
+            created {
+                time
+            }
+            lastModified {
+                time
+            }
+        }
+        ownership {
+            owners {
+                owner {
+                    urn
+                    type
+                    username
+                    info {
+                        active
+                        displayName
+                        title
+                        email
+                        firstName
+                        lastName
+                        fullName
+                    }
+                    editableInfo {
+                        pictureLink
+                    }
+                }
+                type
+            }
+            lastModified {
+                time
+            }
+        }
+        globalTags {
+            tags {
+                tag {
+                    urn
+                    name
+                    description
+                }
             }
         }
     }

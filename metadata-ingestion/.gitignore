@@ -3,6 +3,8 @@
 output
 src/datahub/metadata/
 pvenv36/
+bq_credentials.json
+/tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

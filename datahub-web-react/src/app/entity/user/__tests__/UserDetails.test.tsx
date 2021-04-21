@@ -8,24 +8,28 @@ import { Subview } from '../Subview';
 const ownerships = {
     [EntityType.Dataset]: [
         {
-            name: 'HiveDataset',
-            origin: 'PROD',
-            description: 'this is a dataset',
-            platformNativeType: PlatformNativeType.Table,
-            platform: {
-                name: 'hive',
+            entity: {
+                name: 'HiveDataset',
+                origin: 'PROD',
+                description: 'this is a dataset',
+                platformNativeType: PlatformNativeType.Table,
+                platform: {
+                    name: 'hive',
+                },
+                tags: [],
             },
-            tags: [],
         },
         {
-            name: 'KafkaDataset',
-            origin: 'PROD',
-            description: 'this is also a dataset',
-            platformNativeType: PlatformNativeType.Table,
-            platform: {
-                name: 'kafka',
+            entity: {
+                name: 'KafkaDataset',
+                origin: 'PROD',
+                description: 'this is also a dataset',
+                platformNativeType: PlatformNativeType.Table,
+                platform: {
+                    name: 'kafka',
+                },
+                tags: [],
             },
-            tags: [],
         },
     ],
 };
@@ -47,7 +51,7 @@ describe('UserDetails', () => {
                 <UserDetails urn="some:urn" ownerships={ownerships} />;
             </TestPageContainer>,
         );
-        expect(queryByText('Datasets they own')).not.toBeInTheDocument();
+        expect(queryByText('Datasets owned')).not.toBeInTheDocument();
     });
 
     it('will the show the ownership details when selected', () => {
@@ -56,6 +60,6 @@ describe('UserDetails', () => {
                 <UserDetails urn="some:urn" ownerships={ownerships} subview={Subview.Ownership} item="dataset" />;
             </TestPageContainer>,
         );
-        expect(getByText('Datasets they own')).toBeInTheDocument();
+        expect(getByText('Datasets owned')).toBeInTheDocument();
     });
 });

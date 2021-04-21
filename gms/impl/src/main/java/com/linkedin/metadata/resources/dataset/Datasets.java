@@ -1,5 +1,6 @@
 package com.linkedin.metadata.resources.dataset;
 
+import com.linkedin.common.GlobalTags;
 import com.linkedin.common.InstitutionalMemory;
 import com.linkedin.common.Ownership;
 import com.linkedin.common.Status;
@@ -39,6 +40,7 @@ import com.linkedin.restli.server.annotations.PagingContextParam;
 import com.linkedin.restli.server.annotations.QueryParam;
 import com.linkedin.restli.server.annotations.RestLiCollection;
 import com.linkedin.restli.server.annotations.RestMethod;
+import com.linkedin.schema.EditableSchemaMetadata;
 import com.linkedin.schema.SchemaMetadata;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,8 +154,12 @@ public final class Datasets extends BaseBrowsableEntityResource<
         value.setRemoved(((Status) aspect).isRemoved());
       } else if (aspect instanceof UpstreamLineage) {
         value.setUpstreamLineage((UpstreamLineage) aspect);
+      } else if (aspect instanceof GlobalTags) {
+        value.setGlobalTags(GlobalTags.class.cast(aspect));
+      } else if (aspect instanceof EditableSchemaMetadata) {
+        value.setEditableSchemaMetadata(EditableSchemaMetadata.class.cast(aspect));
       }
-    });
+  });
     return value;
   }
 
@@ -184,6 +190,12 @@ public final class Datasets extends BaseBrowsableEntityResource<
     }
     if (dataset.hasRemoved()) {
       aspects.add(DatasetAspect.create(new Status().setRemoved(dataset.isRemoved())));
+    }
+    if (dataset.hasGlobalTags()) {
+      aspects.add(ModelUtils.newAspectUnion(DatasetAspect.class, dataset.getGlobalTags()));
+    }
+    if (dataset.hasEditableSchemaMetadata()) {
+      aspects.add(ModelUtils.newAspectUnion(DatasetAspect.class, dataset.getEditableSchemaMetadata()));
     }
     return ModelUtils.newSnapshot(DatasetSnapshot.class, datasetUrn, aspects);
   }

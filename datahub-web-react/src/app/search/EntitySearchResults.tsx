@@ -1,24 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { FilterOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Divider, List, Modal, Pagination, Row, Typography } from 'antd';
+import styled from 'styled-components';
+import { Alert, Button, Card, Divider, Drawer, List, Pagination, Row, Typography } from 'antd';
+import { ListProps } from 'antd/lib/list';
 import { SearchCfg } from '../../conf';
 import { useGetSearchResultsQuery } from '../../graphql/search.generated';
-import { EntityType, FacetFilterInput } from '../../types.generated';
+import { EntityType, FacetFilterInput, SearchResult } from '../../types.generated';
 import { IconStyleType } from '../entity/Entity';
 import { Message } from '../shared/Message';
 import { useEntityRegistry } from '../useEntityRegistry';
 import { SearchFilters } from './SearchFilters';
+import { filtersToGraphqlParams } from './utils/filtersToGraphqlParams';
 
 const styles = {
     loading: { marginTop: '10%' },
-    addFilters: { backgroundColor: '#F5F5F5' },
     resultSummary: { color: 'gray', marginTop: '36px' },
     resultHeaderCardBody: { padding: '16px 24px' },
     resultHeaderCard: { right: '52px', top: '-40px', position: 'absolute' },
-    resultList: { width: '100%', borderColor: '#f0f0f0', marginTop: '12px', padding: '16px 32px' },
     paginationRow: { padding: 40 },
     resultsContainer: { width: '100%', padding: '20px 132px' },
 };
+
+const ResultList = styled(List)`
+    &&& {
+        width: 100%;
+        border-color: ${(props) => props.theme.styles['border-color-base']};
+        margin-top: 12px;
+        padding: 16px 32px;
+        box-shadow: ${(props) => props.theme.styles['box-shadow']};
+    }
+`;
+
+const ApplyButton = styled(Button)`
+    && {
+        margin: 20px 25px 0 25px;
+    }
+`;
 
 interface Props {
     type: EntityType;
@@ -44,12 +61,12 @@ export const EntitySearchResults = ({ type, query, page, filters, onChangeFilter
                 query,
                 start: (page - 1) * SearchCfg.RESULTS_PER_PAGE,
                 count: SearchCfg.RESULTS_PER_PAGE,
-                filters,
+                filters: filtersToGraphqlParams(filters),
             },
         },
     });
 
-    const results = data?.search?.entities || [];
+    const results = data?.search?.searchResults || [];
     const pageStart = data?.search?.start || 0;
     const pageSize = data?.search?.count || 0;
     const totalResults = data?.search?.total || 0;
@@ -84,7 +101,7 @@ export const EntitySearchResults = ({ type, query, page, filters, onChangeFilter
     return (
         <div style={styles.resultsContainer}>
             {loading && <Message type="loading" content="Loading..." style={styles.loading} />}
-            <Button style={styles.addFilters} onClick={onEditFilters} data-testid="filters-button">
+            <Button onClick={onEditFilters} data-testid="filters-button">
                 <FilterOutlined />
                 Filters{' '}
                 {filters.length > 0 && (
@@ -94,19 +111,14 @@ export const EntitySearchResults = ({ type, query, page, filters, onChangeFilter
                     </>
                 )}
             </Button>
-            <Modal
-                title="Filters"
-                footer={<Button onClick={onApplyFilters}>Apply</Button>}
-                visible={isEditingFilters}
-                destroyOnClose
-                onCancel={onCloseEditFilters}
-            >
+            <Drawer title="Filters" placement="left" closable visible={isEditingFilters} onClose={onCloseEditFilters}>
                 <SearchFilters
                     facets={data?.search?.facets || []}
                     selectedFilters={selectedFilters}
                     onFilterSelect={onFilterSelect}
                 />
-            </Modal>
+                <ApplyButton onClick={onApplyFilters}>Apply</ApplyButton>
+            </Drawer>
             <Typography.Paragraph style={styles.resultSummary}>
                 Showing{' '}
                 <b>
@@ -114,18 +126,17 @@ export const EntitySearchResults = ({ type, query, page, filters, onChangeFilter
                 </b>{' '}
                 of <b>{totalResults}</b> results
             </Typography.Paragraph>
-            <List
+            <ResultList<React.FC<ListProps<SearchResult>>>
                 header={
                     <Card bodyStyle={styles.resultHeaderCardBody} style={styles.resultHeaderCard as any}>
                         {entityRegistry.getIcon(type, 36, IconStyleType.ACCENT)}
                     </Card>
                 }
-                style={styles.resultList}
                 dataSource={results}
                 split={false}
-                renderItem={(item, index) => (
+                renderItem={(searchResult, index) => (
                     <>
-                        <List.Item>{entityRegistry.renderSearchResult(type, item)}</List.Item>
+                        <List.Item>{entityRegistry.renderSearchResult(type, searchResult)}</List.Item>
                         {index < results.length - 1 && <Divider />}
                     </>
                 )}
@@ -134,7 +145,7 @@ export const EntitySearchResults = ({ type, query, page, filters, onChangeFilter
             <Row justify="center" style={styles.paginationRow}>
                 <Pagination
                     current={page}
-                    pageSize={pageSize}
+                    pageSize={SearchCfg.RESULTS_PER_PAGE}
                     total={totalResults}
                     showLessItems
                     onChange={onChangePage}

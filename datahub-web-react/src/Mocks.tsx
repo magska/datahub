@@ -5,13 +5,13 @@ import {
     GetSearchResultsDocument,
     GetSearchResultsQuery,
 } from './graphql/search.generated';
-import { LoginDocument } from './graphql/auth.generated';
 import { GetUserDocument } from './graphql/user.generated';
-import { Dataset, EntityType } from './types.generated';
+import { Dataset, DatasetLineageType, EntityType, PlatformType, RelatedDataset } from './types.generated';
+import { GetTagDocument } from './graphql/tag.generated';
 
 const user1 = {
     username: 'sdas',
-    urn: 'urn:li:corpuser:2',
+    urn: 'urn:li:corpuser:1',
     type: EntityType.CorpUser,
     info: {
         email: 'sdas@domain.com',
@@ -52,6 +52,11 @@ const dataset1 = {
         urn: 'urn:li:dataPlatform:hdfs',
         name: 'HDFS',
         type: EntityType.DataPlatform,
+        info: {
+            type: PlatformType.FileSystem,
+            datasetNameDelimiter: '.',
+            logoUrl: '',
+        },
     },
     platformNativeType: 'TABLE',
     name: 'The Great Test Dataset',
@@ -114,6 +119,11 @@ const dataset2 = {
     platform: {
         urn: 'urn:li:dataPlatform:mysql',
         name: 'MySQL',
+        info: {
+            type: PlatformType.RelationalDb,
+            datasetNameDelimiter: '.',
+            logoUrl: '',
+        },
         type: EntityType.DataPlatform,
     },
     platformNativeType: 'TABLE',
@@ -150,12 +160,18 @@ const dataset2 = {
     },
 };
 
-const dataset3 = {
+export const dataset3 = {
+    __typename: 'Dataset',
     urn: 'urn:li:dataset:3',
     type: EntityType.Dataset,
     platform: {
         urn: 'urn:li:dataPlatform:kafka',
         name: 'Kafka',
+        info: {
+            type: PlatformType.MessageBroker,
+            datasetNameDelimiter: '.',
+            logoUrl: '',
+        },
         type: EntityType.DataPlatform,
     },
     platformNativeType: 'STREAM',
@@ -190,7 +206,368 @@ const dataset3 = {
             time: 0,
         },
     },
+    globalTags: {
+        tags: [
+            {
+                tag: {
+                    type: EntityType.Tag,
+                    urn: 'urn:li:tag:abc-sample-tag',
+                    name: 'abc-sample-tag',
+                    description: 'sample tag',
+                },
+            },
+        ],
+    },
+    upstreamLineage: null,
+    downstreamLineage: null,
+    institutionalMemory: {
+        elements: [
+            {
+                url: 'https://www.google.com',
+                author: 'datahub',
+                description: 'This only points to Google',
+                created: {
+                    actor: 'urn:li:corpuser:1',
+                    time: 1612396473001,
+                },
+            },
+        ],
+    },
+    schema: null,
+    editableSchemaMetadata: null,
+    deprecation: null,
 } as Dataset;
+
+export const dataset4 = {
+    ...dataset3,
+    name: 'Fourth Test Dataset',
+    urn: 'urn:li:dataset:4',
+};
+
+export const dataset5 = {
+    ...dataset3,
+    name: 'Fifth Test Dataset',
+    urn: 'urn:li:dataset:5',
+};
+
+export const dataset6 = {
+    ...dataset3,
+    name: 'Sixth Test Dataset',
+    urn: 'urn:li:dataset:6',
+};
+
+export const dataset7 = {
+    ...dataset3,
+    name: 'Seventh Test Dataset',
+    urn: 'urn:li:dataset:7',
+};
+
+export const dataset3WithLineage = {
+    ...dataset3,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset7,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset4,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [],
+    },
+};
+
+export const dataset4WithLineage = {
+    ...dataset4,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset6,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset5,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset3,
+            },
+        ],
+    },
+};
+
+export const dataset5WithCyclicalLineage = {
+    ...dataset5,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset3,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset7,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset6,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset4,
+            },
+        ],
+    },
+};
+
+export const dataset5WithLineage = {
+    ...dataset5,
+    upstreamLineage: {
+        upstreams: [] as RelatedDataset[],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset7,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset6,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset4,
+            },
+        ],
+    },
+};
+
+export const dataset6WithLineage = {
+    ...dataset6,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset5,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset4,
+            },
+        ],
+    },
+};
+
+export const dataset7WithLineage = {
+    ...dataset7,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset5,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset3,
+            },
+        ],
+    },
+};
+
+export const dataset7WithSelfReferentialLineage = {
+    ...dataset7,
+    upstreamLineage: {
+        upstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset5,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset7,
+            },
+        ],
+    },
+    downstreamLineage: {
+        downstreams: [
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset3,
+            },
+            {
+                created: {
+                    time: 0,
+                },
+                lastModified: {
+                    time: 0,
+                },
+                type: DatasetLineageType.Transformed,
+                dataset: dataset7,
+            },
+        ],
+    },
+};
+
+const sampleTag = {
+    urn: 'urn:li:tag:abc-sample-tag',
+    name: 'abc-sample-tag',
+    description: 'sample tag description',
+    ownership: {
+        owners: [
+            {
+                owner: {
+                    ...user1,
+                },
+                type: 'DATAOWNER',
+            },
+            {
+                owner: {
+                    ...user2,
+                },
+                type: 'DELEGATE',
+            },
+        ],
+        lastModified: {
+            time: 0,
+        },
+    },
+};
 
 /*
     Define mock data to be returned by Apollo MockProvider. 
@@ -198,31 +575,15 @@ const dataset3 = {
 export const mocks = [
     {
         request: {
-            query: LoginDocument,
-            variables: {
-                username: 'datahub',
-                password: 'datahub',
-            },
-        },
-        result: {
-            data: {
-                login: {
-                    ...user1,
-                },
-            },
-        },
-    },
-    {
-        request: {
             query: GetDatasetDocument,
             variables: {
-                urn: 'urn:li:dataset:1',
+                urn: 'urn:li:dataset:3',
             },
         },
         result: {
             data: {
                 dataset: {
-                    ...dataset1,
+                    ...dataset3,
                 },
             },
         },
@@ -236,7 +597,7 @@ export const mocks = [
         },
         result: {
             data: {
-                dataset: {
+                corpUser: {
                     ...user1,
                 },
             },
@@ -417,18 +778,30 @@ export const mocks = [
                     start: 0,
                     count: 3,
                     total: 3,
-                    entities: [
+                    searchResults: [
                         {
-                            __typename: 'Dataset',
-                            ...dataset1,
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset1,
+                            },
+                            matchedFields: [
+                                {
+                                    name: 'fieldName',
+                                    value: 'fieldValue',
+                                },
+                            ],
                         },
                         {
-                            __typename: 'Dataset',
-                            ...dataset2,
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset2,
+                            },
                         },
                         {
-                            __typename: 'Dataset',
-                            ...dataset3,
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset3,
+                            },
                         },
                     ],
                     facets: [
@@ -475,10 +848,13 @@ export const mocks = [
                     start: 0,
                     count: 1,
                     total: 1,
-                    entities: [
+                    searchResults: [
                         {
-                            __typename: 'Dataset',
-                            ...dataset3,
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset3,
+                            },
+                            matchedFields: [],
                         },
                     ],
                     facets: [
@@ -516,11 +892,7 @@ export const mocks = [
                     filters: [
                         {
                             field: 'platform',
-                            value: 'kafka',
-                        },
-                        {
-                            field: 'platform',
-                            value: 'hdfs',
+                            value: 'kafka,hdfs',
                         },
                     ],
                 },
@@ -534,10 +906,13 @@ export const mocks = [
                     start: 0,
                     count: 1,
                     total: 1,
-                    entities: [
+                    searchResults: [
                         {
-                            __typename: 'Dataset',
-                            ...dataset3,
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset3,
+                            },
+                            matchedFields: [],
                         },
                     ],
                     facets: [
@@ -581,9 +956,12 @@ export const mocks = [
                     start: 0,
                     count: 2,
                     total: 2,
-                    entities: [
+                    searchResult: [
                         {
-                            ...user1,
+                            entity: {
+                                ...user1,
+                            },
+                            matchedFields: [],
                         },
                     ],
                 },
@@ -625,6 +1003,159 @@ export const mocks = [
                         },
                     },
                 },
+            },
+        },
+    },
+    {
+        request: {
+            query: GetSearchResultsDocument,
+            variables: {
+                input: {
+                    type: 'CORP_USER',
+                    query: 'tags:abc-sample-tag',
+                    start: 0,
+                    count: 1,
+                    filters: [],
+                },
+            },
+        },
+        result: {
+            data: {
+                __typename: 'Query',
+                search: {
+                    __typename: 'SearchResults',
+                    start: 0,
+                    count: 0,
+                    total: 2,
+                    searchResults: [],
+                    facets: [],
+                },
+            },
+        },
+    },
+    {
+        request: {
+            query: GetSearchResultsDocument,
+            variables: {
+                input: {
+                    type: 'DATASET',
+                    query: 'tags:abc-sample-tag',
+                    start: 0,
+                    count: 1,
+                    filters: [],
+                },
+            },
+        },
+        result: {
+            data: {
+                __typename: 'Query',
+                search: {
+                    __typename: 'SearchResults',
+                    start: 0,
+                    count: 1,
+                    total: 1,
+                    searchResults: [
+                        {
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset3,
+                            },
+                            matchedFields: [],
+                        },
+                    ],
+                    facets: [
+                        {
+                            field: 'origin',
+                            aggregations: [
+                                {
+                                    value: 'PROD',
+                                    count: 3,
+                                },
+                            ],
+                        },
+                        {
+                            field: 'platform',
+                            aggregations: [
+                                { value: 'hdfs', count: 1 },
+                                { value: 'mysql', count: 1 },
+                                { value: 'kafka', count: 1 },
+                            ],
+                        },
+                    ],
+                },
+            } as GetSearchResultsQuery,
+        },
+    },
+    {
+        request: {
+            query: GetSearchResultsDocument,
+            variables: {
+                input: {
+                    type: 'DATASET',
+                    query: '*',
+                    start: 0,
+                    count: 20,
+                    filters: [],
+                },
+            },
+        },
+        result: {
+            data: {
+                __typename: 'Query',
+                search: {
+                    __typename: 'SearchResults',
+                    start: 0,
+                    count: 1,
+                    total: 1,
+                    searchResults: [
+                        {
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset3,
+                            },
+                            matchedFields: [],
+                        },
+                        {
+                            entity: {
+                                __typename: 'Dataset',
+                                ...dataset4,
+                            },
+                            matchedFields: [],
+                        },
+                    ],
+                    facets: [
+                        {
+                            field: 'origin',
+                            aggregations: [
+                                {
+                                    value: 'PROD',
+                                    count: 3,
+                                },
+                            ],
+                        },
+                        {
+                            field: 'platform',
+                            aggregations: [
+                                { value: 'hdfs', count: 1 },
+                                { value: 'mysql', count: 1 },
+                                { value: 'kafka', count: 1 },
+                            ],
+                        },
+                    ],
+                },
+            } as GetSearchResultsQuery,
+        },
+    },
+    {
+        request: {
+            query: GetTagDocument,
+            variables: {
+                urn: 'urn:li:tag:abc-sample-tag',
+            },
+        },
+        result: {
+            data: {
+                tag: { ...sampleTag },
             },
         },
     },

@@ -4,12 +4,12 @@ import { useReactiveVar } from '@apollo/client';
 import { BrowseResultsPage } from './browse/BrowseResultsPage';
 import { LogIn } from './auth/LogIn';
 import { NoPageFound } from './shared/NoPageFound';
-import { isLoggedInVar } from './auth/checkAuthStatus';
 import { EntityPage } from './entity/EntityPage';
 import { PageRoutes } from '../conf/Global';
 import { useEntityRegistry } from './useEntityRegistry';
 import { HomePage } from './home/HomePage';
 import { SearchPage } from './search/SearchPage';
+import { isLoggedInVar } from './auth/checkAuthStatus';
 
 const ProtectedRoute = ({
     isLoggedIn,
@@ -18,7 +18,8 @@ const ProtectedRoute = ({
     isLoggedIn: boolean;
 } & RouteProps) => {
     if (!isLoggedIn) {
-        return <Redirect to={PageRoutes.LOG_IN} />;
+        window.location.replace(PageRoutes.AUTHENTICATE);
+        return null;
     }
     return <Route {...props} />;
 };
@@ -34,8 +35,8 @@ export const Routes = (): JSX.Element => {
         <div>
             <Switch>
                 <ProtectedRoute isLoggedIn={isLoggedIn} exact path="/" render={() => <HomePage />} />
-                <Route path={PageRoutes.LOG_IN} component={LogIn} />
 
+                <Route path={PageRoutes.LOG_IN} component={LogIn} />
                 {entityRegistry.getEntities().map((entity) => (
                     <ProtectedRoute
                         key={entity.getPathName()}
@@ -54,6 +55,8 @@ export const Routes = (): JSX.Element => {
                     path={PageRoutes.BROWSE_RESULTS}
                     render={() => <BrowseResultsPage />}
                 />
+                {/* Starting the react app locally opens /assets by default. For a smoother dev experience, we'll redirect to the homepage */}
+                <Route path={PageRoutes.ASSETS} component={() => <Redirect to="/" />} exact />
                 <Route component={NoPageFound} />
             </Switch>
         </div>

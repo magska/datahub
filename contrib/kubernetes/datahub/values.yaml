@@ -26,6 +26,27 @@ datahub-mce-consumer:
     repository: linkedin/datahub-mce-consumer
     tag: "latest"
 
+datahub-ingestion-cron:
+  enabled: false
+  image:
+    repository: linkedin/datahub-ingestion
+    tag: "latest"
+
+elasticsearchSetupJob:
+  enabled: true
+  image:
+    repository: linkedin/datahub-elasticsearch-setup
+    tag: "latest"
+
+kafkaSetupJob:
+  enabled: true
+  image:
+    repository: linkedin/datahub-kafka-setup
+    tag: "latest"
+
+mysqlSetupJob:
+  enabled: false
+
 global:
   elasticsearch:
     host: "elasticsearch"
@@ -34,6 +55,8 @@ global:
   kafka:
     bootstrap:
       server: "broker:29092"
+    zookeeper:
+      server: "zookeeper:2181"
     schemaregistry:
       url: "http://schema-registry:8081"
 
@@ -48,6 +71,7 @@ global:
   sql:
     datasource:
       host: "mysql:3306"
+      hostForMysqlClient: "mysql"
       url: "jdbc:mysql://mysql:3306/datahub?verifyServerCertificate=false&useSSL=true"
       driver: "com.mysql.jdbc.Driver"
       username: "datahub"
@@ -68,22 +92,22 @@ global:
         - "elasticsearch"
         - "neo4j"
 
-  # credentialsAndCertsSecretPath: /mnt/datahub/certs
-  # credentialsAndCertsSecrets:
-  #   name: datahub-certs
-  #   secureEnv:
-  #     ssl.key.password: datahub.linkedin.com.KeyPass
-  #     ssl.keystore.password: datahub.linkedin.com.KeyStorePass
-  #     ssl.truststore.password: datahub.linkedin.com.TrustStorePass
-  #     kafkastore.ssl.truststore.password: datahub.linkedin.com.TrustStorePass
-
-  # springKafkaConfigurationOverrides:
-  #   ssl.keystore.location: /mnt/datahub/certs/datahub.linkedin.com.keystore.jks
-  #   ssl.truststore.location: /mnt/datahub/certs/datahub.linkedin.com.truststore.jks
-  #   kafkastore.ssl.truststore.location: /mnt/datahub/certs/datahub.linkedin.com.truststore.jks
-  #   security.protocol: SSL
-  #   kafkastore.security.protocol: SSL
-  #   ssl.keystore.type: JKS
-  #   ssl.truststore.type: JKS
-  #   ssl.protocol: TLS
-  #   ssl.endpoint.identification.algorithm: 
+#  credentialsAndCertsSecrets:
+#    name: datahub-certs
+#    path: /mnt/datahub/certs
+#    secureEnv:
+#      ssl.key.password: datahub.linkedin.com.KeyPass
+#      ssl.keystore.password: datahub.linkedin.com.KeyStorePass
+#      ssl.truststore.password: datahub.linkedin.com.TrustStorePass
+#      kafkastore.ssl.truststore.password: datahub.linkedin.com.TrustStorePass
+#
+#  springKafkaConfigurationOverrides:
+#    ssl.keystore.location: /mnt/datahub/certs/datahub.linkedin.com.keystore.jks
+#    ssl.truststore.location: /mnt/datahub/certs/datahub.linkedin.com.truststore.jks
+#    kafkastore.ssl.truststore.location: /mnt/datahub/certs/datahub.linkedin.com.truststore.jks
+#    security.protocol: SSL
+#    kafkastore.security.protocol: SSL
+#    ssl.keystore.type: JKS
+#    ssl.truststore.type: JKS
+#    ssl.protocol: TLS
+#    ssl.endpoint.identification.algorithm:

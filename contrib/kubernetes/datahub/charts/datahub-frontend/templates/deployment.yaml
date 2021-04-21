@@ -26,12 +26,17 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-      {{- if .Values.extraVolumes }}
-        {{ toYaml .Values.extraVolumes | nindent 8 }}
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.exporters.jmx.enabled }}
+      - name: config-jmx-exporter
+        configMap:
+          name: {{ include "datahub-frontend.fullname" . }}-config-jmx-exporter
       {{- end }}
       initContainers:
-      {{- if .Values.extraInitContainers }}
-      {{- .Values.extraInitContainers | toYaml | nindent 6 }}
+      {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -41,16 +46,22 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 9001
+              containerPort: 9002
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /admin
               port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
               path: /admin
               port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           env:
             - name: DATAHUB_GMS_HOST
               value: {{ printf "%s-%s" .Release.Name "datahub-gms" }}
@@ -58,22 +69,31 @@ spec:
               value: "{{ .Values.global.datahub.gms.port }}"
             - name: DATAHUB_SECRET
               valueFrom:
+                {{- if .Values.existingGmsSecret }}
+                secretKeyRef:
+                  name: "{{ .Values.existingGmsSecret.name }}"
+                  key: "{{ .Values.existingGmsSecret.key }}"
+                {{- else }}
                 secretKeyRef:
                   name: {{ printf "%s-gms-secret" .Release.Name }}
                   key: datahub.gms.secret
+                {{- end }}
             - name: DATAHUB_APP_VERSION
               value: "{{ .Values.global.datahub.appVersion }}"
             - name: DATAHUB_PLAY_MEM_BUFFER_SIZE
               value: "{{ .Values.datahub.play.mem.buffer.size }}"
-          {{- if .Values.extraEnvs }}
-            {{ toYaml .Values.extraEnvs | nindent 12 }}
+          {{- with .Values.extraEnvs }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-          {{- if .Values.extraVolumeMounts }}
-            {{ toYaml .Values.extraVolumeMounts | nindent 10 }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+        {{- include "datahub-jmxexporter.container" . }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

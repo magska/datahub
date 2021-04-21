@@ -33,6 +33,55 @@
     "namespace" : "com.linkedin.common",
     "ref" : "string"
   }, {
+    "type" : "record",
+    "name" : "GlobalTags",
+    "namespace" : "com.linkedin.common",
+    "doc" : "Tag aspect used for applying tags to an entity",
+    "fields" : [ {
+      "name" : "tags",
+      "type" : {
+        "type" : "array",
+        "items" : {
+          "type" : "record",
+          "name" : "TagAssociation",
+          "doc" : "Properties of an applied tag. For now, just an Urn. In the future we can extend this with other properties, e.g.\npropagation parameters.",
+          "fields" : [ {
+            "name" : "tag",
+            "type" : {
+              "type" : "typeref",
+              "name" : "TagUrn",
+              "doc" : "Globally defined tag",
+              "ref" : "string",
+              "java" : {
+                "class" : "com.linkedin.common.urn.TagUrn"
+              },
+              "validate" : {
+                "com.linkedin.common.validator.TypedUrnValidator" : {
+                  "accessible" : true,
+                  "constructable" : true,
+                  "doc" : "Globally defined tags",
+                  "entityType" : "tag",
+                  "fields" : [ {
+                    "doc" : "tag name",
+                    "maxLength" : 200,
+                    "name" : "name",
+                    "type" : "string"
+                  } ],
+                  "maxLength" : 220,
+                  "name" : "Tag",
+                  "namespace" : "li",
+                  "owners" : [ ],
+                  "owningTeam" : "urn:li:internalTeam:datahub"
+                }
+              }
+            },
+            "doc" : "Urn of the applied tag"
+          } ]
+        }
+      },
+      "doc" : "Tags associated with a given entity"
+    } ]
+  }, "com.linkedin.common.TagAssociation", "com.linkedin.common.TagUrn", {
     "type" : "typeref",
     "name" : "Url",
     "namespace" : "com.linkedin.common",
@@ -163,6 +212,11 @@
       },
       "doc" : "Editable information of the corp user",
       "optional" : true
+    }, {
+      "name" : "globalTags",
+      "type" : "com.linkedin.common.GlobalTags",
+      "doc" : "List of global tags applied to the corp user",
+      "optional" : true
     } ]
   }, "com.linkedin.identity.CorpUserEditableInfo", "com.linkedin.identity.CorpUserInfo", {
     "type" : "record",
@@ -185,7 +239,7 @@
     "name" : "CorpUserAspect",
     "namespace" : "com.linkedin.metadata.aspect",
     "doc" : "A union of all supported metadata aspects for a CorpUser",
-    "ref" : [ "com.linkedin.identity.CorpUserInfo", "com.linkedin.identity.CorpUserEditableInfo" ]
+    "ref" : [ "com.linkedin.identity.CorpUserInfo", "com.linkedin.identity.CorpUserEditableInfo", "com.linkedin.common.GlobalTags" ]
   }, {
     "type" : "record",
     "name" : "AggregationMetadata",
@@ -269,6 +323,30 @@
     } ]
   }, {
     "type" : "record",
+    "name" : "MatchMetadata",
+    "namespace" : "com.linkedin.metadata.query",
+    "fields" : [ {
+      "name" : "matchedFields",
+      "type" : {
+        "type" : "array",
+        "items" : {
+          "type" : "record",
+          "name" : "MatchedField",
+          "fields" : [ {
+            "name" : "name",
+            "type" : "string",
+            "doc" : "Matched field name"
+          }, {
+            "name" : "value",
+            "type" : "string",
+            "doc" : "Matched field value"
+          } ]
+        }
+      },
+      "doc" : "Matched field name and values"
+    } ]
+  }, "com.linkedin.metadata.query.MatchedField", {
+    "type" : "record",
     "name" : "SearchResultMetadata",
     "namespace" : "com.linkedin.metadata.query",
     "doc" : "The model for the search result",
@@ -286,6 +364,14 @@
         "items" : "com.linkedin.common.Urn"
       },
       "doc" : "A list of urns corresponding to search documents (in order) as returned by the search index"
+    }, {
+      "name" : "matches",
+      "type" : {
+        "type" : "array",
+        "items" : "MatchMetadata"
+      },
+      "doc" : "A list of match metadata for each search result, containing the list of fields in the search document that matched the query",
+      "optional" : true
     } ]
   }, {
     "type" : "record",

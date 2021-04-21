@@ -42,7 +42,7 @@ python metadata-ingestion/mce_cli.py produce
 This will create a default user with username `datahub`. You can sign in to the app using `datahub` as your username.
 
 ## Start via Docker image
-Quickest way to try out `DataHub Frontend` is running the [Docker image](../docker/frontend).
+Quickest way to try out `DataHub Frontend` is running the [Docker image](../docker/datahub-frontend).
 
 ## Start via command line
 If you do modify things and want to try it out quickly without building the Docker image, you can also run
@@ -50,8 +50,6 @@ the application directly from command line after a successful [build](#build):
 ```
 cd datahub-frontend/run && ./run-local-frontend
 ```
-
-If you are running the React app locally via `yarn start`, it will be forwarding graphql requests to port `9002`. In order to use `./run-local-frontend` with the React app, change the PORT value in [./run/frontend.env](./run/frontend.env) to `9002` and restart `./run-local-frontend`
 
 ## Checking out DataHub UI
 After starting your application in one of the two ways mentioned above, you can connect to it by typing below 
@@ -321,7 +319,10 @@ WHZ-Authentication {
 };
 ```
 
-Note that the special keyword `USERNAME` will be substituted by the actual username.  
+### Authentication in React
+The React app supports both JAAS as described above and separately OIDC authentication. To learn about configuring OIDC for React,
+see the [OIDC in React](../docs/how/configure-oidc-react.md) document. 
+
 
 ### API Debugging
 Most DataHub frontend API endpoints are protected using [Play Authentication](https://www.playframework.com/documentation/2.1.0/JavaGuide4), which means it requires authentication information stored in the cookie for the request to go through. This makes debugging using curl difficult. One option is to first make a curl call against the `/authenticate` endpoint and stores the authentication info in a cookie file like this

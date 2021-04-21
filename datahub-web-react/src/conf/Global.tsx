@@ -1,17 +1,21 @@
-import DataHubLogo from '../images/landing-logo.png';
-/*
-    Reference to the Logo Image used in Log in page and in search header 
-*/
-export const LOGO_IMAGE = DataHubLogo;
-
 /*
    Default top-level page route names (excludes entity pages)
 */
 export enum PageRoutes {
+    /**
+     * Server-side authentication route
+     */
+    AUTHENTICATE = '/authenticate',
     LOG_IN = '/login',
     SEARCH_RESULTS = '/search/:type?',
     SEARCH = '/search',
     BROWSE = '/browse',
     BROWSE_RESULTS = '/browse/:type',
     DATASETS = '/datasets',
+    ASSETS = '/assets',
 }
+
+/**
+ * Name of the auth cookie checked on client side (contains the currently authenticated user urn).
+ */
+export const CLIENT_AUTH_COOKIE = 'actor';

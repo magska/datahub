@@ -14,6 +14,124 @@ query getChart($urn: String!) {
                 description
                 platform {
                     name
+                    info {
+                        logoUrl
+                    }
+                }
+                platformNativeType
+                tags
+                ownership {
+                    owners {
+                        owner {
+                            urn
+                            type
+                            username
+                            info {
+                                active
+                                displayName
+                                title
+                                firstName
+                                lastName
+                                fullName
+                            }
+                            editableInfo {
+                                pictureLink
+                            }
+                        }
+                        type
+                    }
+                    lastModified {
+                        time
+                    }
+                }
+                downstreamLineage {
+                    downstreams {
+                        type
+                        dataset {
+                            urn
+                        }
+                    }
+                }
+                upstreamLineage {
+                    upstreams {
+                        type
+                        dataset {
+                            urn
+                        }
+                    }
+                }
+            }
+            url
+            type
+            access
+            lastRefreshed
+            lastModified {
+                time
+            }
+            created {
+                time
+            }
+        }
+        query {
+            rawQuery
+            type
+        }
+        ownership {
+            owners {
+                owner {
+                    urn
+                    type
+                    username
+                    info {
+                        active
+                        displayName
+                        title
+                        email
+                        firstName
+                        lastName
+                        fullName
+                    }
+                    editableInfo {
+                        pictureLink
+                    }
+                }
+                type
+            }
+            lastModified {
+                time
+            }
+        }
+        globalTags {
+            tags {
+                tag {
+                    urn
+                    name
+                    description
+                }
+            }
+        }
+    }
+}
+
+mutation updateChart($input: ChartUpdateInput!) {
+    updateChart(input: $input) {
+        urn
+        type
+        tool
+        chartId
+        info {
+            name
+            description
+            inputs {
+                urn
+                name
+                origin
+                description
+                platform {
+                    name
+                    info {
+                        logoUrl
+                    }
                 }
                 platformNativeType
                 tags
@@ -80,6 +198,15 @@ query getChart($urn: String!) {
             }
             lastModified {
                 time
+            }
+        }
+        globalTags {
+            tags {
+                tag {
+                    urn
+                    name
+                    description
+                }
             }
         }
     }

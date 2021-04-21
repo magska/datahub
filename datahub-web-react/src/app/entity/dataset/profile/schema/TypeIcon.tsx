@@ -2,14 +2,20 @@ import {
     FieldBinaryOutlined,
     NumberOutlined,
     UnorderedListOutlined,
-    CloseCircleOutlined,
+    QuestionCircleOutlined,
     UnderlineOutlined,
+    CalendarOutlined,
+    FieldTimeOutlined,
 } from '@ant-design/icons';
 import { Typography } from 'antd';
 import React, { FC } from 'react';
 import { VscSymbolString, VscFileBinary } from 'react-icons/vsc';
 import styled from 'styled-components';
 import { SchemaFieldDataType } from '../../../../../types.generated';
+
+const TypeIconContainer = styled.div`
+    display: inline-block;
+`;
 
 const TypeSubtitle = styled.div`
     font-size: 8px;
@@ -32,8 +38,10 @@ const DATA_TYPE_ICON_MAP: Record<
         text: 'Bytes',
     },
     [SchemaFieldDataType.Number]: { icon: NumberOutlined, size: 14, text: 'Number' },
+    [SchemaFieldDataType.Date]: { icon: CalendarOutlined, size: 18, text: 'Date' },
+    [SchemaFieldDataType.Time]: { icon: FieldTimeOutlined, size: 18, text: 'Time' },
     [SchemaFieldDataType.Enum]: { icon: UnorderedListOutlined, size: 18, text: 'Enum' },
-    [SchemaFieldDataType.Null]: { icon: CloseCircleOutlined, size: 14, text: 'Null' },
+    [SchemaFieldDataType.Null]: { icon: QuestionCircleOutlined, size: 16, text: '' },
     [SchemaFieldDataType.Map]: { icon: null, size: 0, text: 'Map' },
     [SchemaFieldDataType.Array]: { icon: UnorderedListOutlined, size: 14, text: 'Array' },
     [SchemaFieldDataType.Union]: { icon: UnderlineOutlined, size: 14, text: 'Union' },
@@ -47,11 +55,11 @@ type Props = {
 export default function TypeIcon({ type }: Props) {
     const { icon: Icon, size, text } = DATA_TYPE_ICON_MAP[type];
     return (
-        <span data-testid={`icon-${type}`}>
+        <TypeIconContainer data-testid={`icon-${type}`}>
             {Icon && <Icon style={{ fontSize: size }} />}
             <TypeSubtitle>
                 <Typography.Text type="secondary">{text}</Typography.Text>
             </TypeSubtitle>
-        </span>
+        </TypeIconContainer>
     );
 }

@@ -1,15 +1,11 @@
-import { Avatar, Button, Divider, Row, Space, Tooltip, Typography } from 'antd';
+import { Avatar, Button, Divider, Row, Space, Typography } from 'antd';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { AuditStamp, EntityType, Ownership } from '../../../../types.generated';
 import { useEntityRegistry } from '../../../useEntityRegistry';
-import defaultAvatar from '../../../../images/default_avatar.png';
+import CustomAvatar from '../../../shared/avatar/CustomAvatar';
 
 const styles = {
     content: { width: '100%' },
-    typeLabel: { color: 'rgba(0, 0, 0, 0.45)' },
-    platformLabel: { color: 'rgba(0, 0, 0, 0.45)' },
-    lastUpdatedLabel: { color: 'rgba(0, 0, 0, 0.45)' },
 };
 
 export type Props = {
@@ -27,8 +23,8 @@ export default function ChartHeader({ platform, description, ownership, url, las
         <Space direction="vertical" size={15} style={styles.content}>
             <Row justify="space-between">
                 <Space split={<Divider type="vertical" />}>
-                    <Typography.Text style={styles.typeLabel}>Chart</Typography.Text>
-                    <Typography.Text strong style={styles.platformLabel}>
+                    <Typography.Text type="secondary">Chart</Typography.Text>
+                    <Typography.Text strong type="secondary">
                         {platform}
                     </Typography.Text>
                 </Space>
@@ -37,15 +33,16 @@ export default function ChartHeader({ platform, description, ownership, url, las
             <Typography.Paragraph>{description}</Typography.Paragraph>
             <Avatar.Group maxCount={6} size="large">
                 {ownership?.owners?.map((owner: any) => (
-                    <Tooltip title={owner.owner.info?.fullName}>
-                        <Link to={`/${entityRegistry.getPathName(EntityType.CorpUser)}/${owner.owner.urn}`}>
-                            <Avatar src={owner.owner.editableInfo.pictureLink || defaultAvatar} />
-                        </Link>
-                    </Tooltip>
+                    <CustomAvatar
+                        key={owner.owner.urn}
+                        name={owner.owner.info?.fullName}
+                        url={`/${entityRegistry.getPathName(EntityType.CorpUser)}/${owner.owner.urn}`}
+                        photoUrl={owner.owner.editableInfo?.pictureLink}
+                    />
                 ))}
             </Avatar.Group>
             {lastModified && (
-                <Typography.Text style={styles.lastUpdatedLabel}>
+                <Typography.Text type="secondary">
                     Last modified at {new Date(lastModified.time).toLocaleDateString('en-US')}
                 </Typography.Text>
             )}

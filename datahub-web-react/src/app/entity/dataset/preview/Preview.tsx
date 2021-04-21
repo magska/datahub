@@ -1,8 +1,7 @@
 import React from 'react';
-import { EntityType, FabricType, Owner } from '../../../../types.generated';
+import { EntityType, FabricType, Owner, GlobalTags } from '../../../../types.generated';
 import DefaultPreviewCard from '../../../preview/DefaultPreviewCard';
 import { useEntityRegistry } from '../../../useEntityRegistry';
-import { getLogoFromPlatform } from '../../chart/getLogoFromPlatform';
 
 export const Preview = ({
     urn,
@@ -10,29 +9,32 @@ export const Preview = ({
     origin,
     description,
     platformName,
-    tags,
+    platformLogo,
     owners,
+    globalTags,
+    snippet,
 }: {
     urn: string;
     name: string;
     origin: FabricType;
     description?: string | null;
     platformName: string;
-    tags: Array<string>;
+    platformLogo?: string | null;
     owners?: Array<Owner> | null;
+    globalTags?: GlobalTags | null;
+    snippet?: React.ReactNode | null;
 }): JSX.Element => {
     const entityRegistry = useEntityRegistry();
-
     return (
         <DefaultPreviewCard
             url={`/${entityRegistry.getPathName(EntityType.Dataset)}/${urn}`}
             name={name || ''}
             description={description || ''}
             type="Dataset"
-            logoUrl={getLogoFromPlatform(platformName) || ''}
+            logoUrl={platformLogo || ''}
             platform={platformName}
             qualifier={origin}
-            tags={tags}
+            tags={globalTags || undefined}
             owners={
                 owners?.map((owner) => {
                     return {
@@ -42,6 +44,7 @@ export const Preview = ({
                     };
                 }) || []
             }
+            snippet={snippet}
         />
     );
 };

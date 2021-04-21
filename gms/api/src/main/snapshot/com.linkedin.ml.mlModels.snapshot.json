@@ -320,7 +320,7 @@
     "fields" : [ {
       "name" : "owner",
       "type" : "Urn",
-      "doc" : "Owner URN, e.g. urn:li:corpuser:ldap, urn:li:corpGroup:group_name, and urn:li:multiProduct:mp_name"
+      "doc" : "Owner URN, e.g. urn:li:corpuser:ldap, urn:li:corpGroup:group_name, and urn:li:multiProduct:mp_name\n(Caveat: only corpuser is currently supported in the frontend.)"
     }, {
       "name" : "type",
       "type" : {
@@ -853,6 +853,30 @@
     } ]
   }, {
     "type" : "record",
+    "name" : "MatchMetadata",
+    "namespace" : "com.linkedin.metadata.query",
+    "fields" : [ {
+      "name" : "matchedFields",
+      "type" : {
+        "type" : "array",
+        "items" : {
+          "type" : "record",
+          "name" : "MatchedField",
+          "fields" : [ {
+            "name" : "name",
+            "type" : "string",
+            "doc" : "Matched field name"
+          }, {
+            "name" : "value",
+            "type" : "string",
+            "doc" : "Matched field value"
+          } ]
+        }
+      },
+      "doc" : "Matched field name and values"
+    } ]
+  }, "com.linkedin.metadata.query.MatchedField", {
+    "type" : "record",
     "name" : "SearchResultMetadata",
     "namespace" : "com.linkedin.metadata.query",
     "doc" : "The model for the search result",
@@ -870,6 +894,14 @@
         "items" : "com.linkedin.common.Urn"
       },
       "doc" : "A list of urns corresponding to search documents (in order) as returned by the search index"
+    }, {
+      "name" : "matches",
+      "type" : {
+        "type" : "array",
+        "items" : "MatchMetadata"
+      },
+      "doc" : "A list of match metadata for each search result, containing the list of fields in the search document that matched the query",
+      "optional" : true
     } ]
   }, {
     "type" : "record",
@@ -972,6 +1004,28 @@
       } ]
     }, "com.linkedin.common.ChangeAuditStamps" ],
     "fields" : [ {
+      "name" : "id",
+      "type" : "long",
+      "doc" : "Model unique identifier. System assigned value when a new model is created.",
+      "default" : 0
+    }, {
+      "name" : "urn",
+      "type" : "com.linkedin.common.MLModelUrn",
+      "doc" : "Model urn"
+    }, {
+      "name" : "description",
+      "type" : "string",
+      "doc" : "Description for model",
+      "default" : ""
+    }, {
+      "name" : "tags",
+      "type" : {
+        "type" : "array",
+        "items" : "string"
+      },
+      "doc" : "tags for searching model",
+      "default" : [ ]
+    }, {
       "name" : "ownership",
       "type" : "com.linkedin.common.Ownership",
       "doc" : "Ownership Info",
@@ -1070,7 +1124,7 @@
     "doc" : "generated from: com.linkedin.metadata.resources.ml.MLModels",
     "collection" : {
       "identifier" : {
-        "name" : "model",
+        "name" : "mlmodel",
         "type" : "com.linkedin.ml.MLModelKey",
         "params" : "com.linkedin.restli.common.EmptyRecord"
       },
@@ -1080,21 +1134,21 @@
         "parameters" : [ {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         } ]
       }, {
         "method" : "batch_get",
         "parameters" : [ {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         } ]
       }, {
         "method" : "get_all",
         "parameters" : [ {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         }, {
           "name" : "filter",
           "type" : "com.linkedin.metadata.query.Filter",
@@ -1114,7 +1168,7 @@
         }, {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         }, {
           "name" : "filter",
           "type" : "com.linkedin.metadata.query.Filter",
@@ -1153,7 +1207,7 @@
         }, {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         } ],
         "returns" : "com.linkedin.metadata.restli.BackfillResult"
       }, {
@@ -1164,7 +1218,7 @@
         }, {
           "name" : "aspects",
           "type" : "{ \"type\" : \"array\", \"items\" : \"string\" }",
-          "default" : "[]"
+          "optional" : true
         } ],
         "returns" : "com.linkedin.metadata.snapshot.MLModelSnapshot"
       }, {
@@ -1175,11 +1229,11 @@
         } ]
       } ],
       "entity" : {
-        "path" : "/mlModels/{model}",
+        "path" : "/mlModels/{mlmodel}",
         "subresources" : [ {
           "name" : "caveatsAndRecommendations",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/caveatsAndRecommendations",
+          "path" : "/mlModels/{mlmodel}/caveatsAndRecommendations",
           "schema" : "com.linkedin.ml.metadata.CaveatsAndRecommendations",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/caveatsAndRecommendations\n\ngenerated from: com.linkedin.metadata.resources.ml.CaveatsAndRecommendationsResource",
           "collection" : {
@@ -1194,13 +1248,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/caveatsAndRecommendations/{caveatsAndRecommendationsId}"
+              "path" : "/mlModels/{mlmodel}/caveatsAndRecommendations/{caveatsAndRecommendationsId}"
             }
           }
         }, {
           "name" : "cost",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/cost",
+          "path" : "/mlModels/{mlmodel}/cost",
           "schema" : "com.linkedin.common.Cost",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/cost\n\ngenerated from: com.linkedin.metadata.resources.ml.CostResource",
           "collection" : {
@@ -1215,13 +1269,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/cost/{costId}"
+              "path" : "/mlModels/{mlmodel}/cost/{costId}"
             }
           }
         }, {
           "name" : "deprecation",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/deprecation",
+          "path" : "/mlModels/{mlmodel}/deprecation",
           "schema" : "com.linkedin.common.Deprecation",
           "doc" : "Rest.li entry point: /mlmodels/{mlModelKey}/deprecation\n\ngenerated from: com.linkedin.metadata.resources.ml.DeprecationResource",
           "collection" : {
@@ -1236,13 +1290,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/deprecation/{deprecationId}"
+              "path" : "/mlModels/{mlmodel}/deprecation/{deprecationId}"
             }
           }
         }, {
           "name" : "ethicalConsiderations",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/ethicalConsiderations",
+          "path" : "/mlModels/{mlmodel}/ethicalConsiderations",
           "schema" : "com.linkedin.ml.metadata.EthicalConsiderations",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/ethicalConsiderations\n\ngenerated from: com.linkedin.metadata.resources.ml.EthicalConsiderationsResource",
           "collection" : {
@@ -1257,13 +1311,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/ethicalConsiderations/{ethicalConsiderationsId}"
+              "path" : "/mlModels/{mlmodel}/ethicalConsiderations/{ethicalConsiderationsId}"
             }
           }
         }, {
           "name" : "evaluationData",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/evaluationData",
+          "path" : "/mlModels/{mlmodel}/evaluationData",
           "schema" : "com.linkedin.ml.metadata.EvaluationData",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/evaluationData\n\ngenerated from: com.linkedin.metadata.resources.ml.EvaluationDataResource",
           "collection" : {
@@ -1278,13 +1332,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/evaluationData/{evaluationDataId}"
+              "path" : "/mlModels/{mlmodel}/evaluationData/{evaluationDataId}"
             }
           }
         }, {
           "name" : "institutionalMemory",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/institutionalMemory",
+          "path" : "/mlModels/{mlmodel}/institutionalMemory",
           "schema" : "com.linkedin.common.InstitutionalMemory",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/institutionalMemory\n\ngenerated from: com.linkedin.metadata.resources.ml.InstitutionalMemoryResource",
           "collection" : {
@@ -1299,13 +1353,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/institutionalMemory/{institutionalMemoryId}"
+              "path" : "/mlModels/{mlmodel}/institutionalMemory/{institutionalMemoryId}"
             }
           }
         }, {
           "name" : "intendedUse",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/intendedUse",
+          "path" : "/mlModels/{mlmodel}/intendedUse",
           "schema" : "com.linkedin.ml.metadata.IntendedUse",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/intendedUse\n\ngenerated from: com.linkedin.metadata.resources.ml.IntendedUseResource",
           "collection" : {
@@ -1320,13 +1374,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/intendedUse/{intendedUseId}"
+              "path" : "/mlModels/{mlmodel}/intendedUse/{intendedUseId}"
             }
           }
         }, {
           "name" : "metrics",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/metrics",
+          "path" : "/mlModels/{mlmodel}/metrics",
           "schema" : "com.linkedin.ml.metadata.Metrics",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/metrics\n\ngenerated from: com.linkedin.metadata.resources.ml.MetricsResource",
           "collection" : {
@@ -1341,13 +1395,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/metrics/{metricsId}"
+              "path" : "/mlModels/{mlmodel}/metrics/{metricsId}"
             }
           }
         }, {
           "name" : "mlModelFactorPrompts",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/mlModelFactorPrompts",
+          "path" : "/mlModels/{mlmodel}/mlModelFactorPrompts",
           "schema" : "com.linkedin.ml.metadata.MLModelFactorPrompts",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/mlModelFactorPrompts\n\ngenerated from: com.linkedin.metadata.resources.ml.MLModelFactorPromptsResource",
           "collection" : {
@@ -1362,13 +1416,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/mlModelFactorPrompts/{mlModelFactorPromptsId}"
+              "path" : "/mlModels/{mlmodel}/mlModelFactorPrompts/{mlModelFactorPromptsId}"
             }
           }
         }, {
           "name" : "ownership",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/ownership",
+          "path" : "/mlModels/{mlmodel}/ownership",
           "schema" : "com.linkedin.common.Ownership",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/ownership\n\ngenerated from: com.linkedin.metadata.resources.ml.OwnershipResource",
           "collection" : {
@@ -1383,13 +1437,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/ownership/{ownershipId}"
+              "path" : "/mlModels/{mlmodel}/ownership/{ownershipId}"
             }
           }
         }, {
           "name" : "quantitativeAnalyses",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/quantitativeAnalyses",
+          "path" : "/mlModels/{mlmodel}/quantitativeAnalyses",
           "schema" : "com.linkedin.ml.metadata.QuantitativeAnalyses",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/quantitativeAnalyses\n\ngenerated from: com.linkedin.metadata.resources.ml.QuantitativeAnalysesResource",
           "collection" : {
@@ -1404,13 +1458,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/quantitativeAnalyses/{quantitativeAnalysesId}"
+              "path" : "/mlModels/{mlmodel}/quantitativeAnalyses/{quantitativeAnalysesId}"
             }
           }
         }, {
           "name" : "sourceCode",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/sourceCode",
+          "path" : "/mlModels/{mlmodel}/sourceCode",
           "schema" : "com.linkedin.ml.metadata.SourceCode",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/sourceCode\n\ngenerated from: com.linkedin.metadata.resources.ml.SourceCodeResource",
           "collection" : {
@@ -1425,13 +1479,13 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/sourceCode/{sourceCodeId}"
+              "path" : "/mlModels/{mlmodel}/sourceCode/{sourceCodeId}"
             }
           }
         }, {
           "name" : "trainingData",
           "namespace" : "com.linkedin.ml",
-          "path" : "/mlModels/{model}/trainingData",
+          "path" : "/mlModels/{mlmodel}/trainingData",
           "schema" : "com.linkedin.ml.metadata.TrainingData",
           "doc" : "Rest.li entry point: /mlModels/{mlModelKey}/trainingData\n\ngenerated from: com.linkedin.metadata.resources.ml.TrainingDataResource",
           "collection" : {
@@ -1446,7 +1500,7 @@
               "method" : "get"
             } ],
             "entity" : {
-              "path" : "/mlModels/{model}/trainingData/{trainingDataId}"
+              "path" : "/mlModels/{mlmodel}/trainingData/{trainingDataId}"
             }
           }
         } ]

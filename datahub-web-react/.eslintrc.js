@@ -31,6 +31,7 @@ module.exports = {
         'no-plusplus': 'off',
         'no-prototype-builtins': 'off',
         'react/require-default-props': 'off',
+        'no-underscore-dangle': 'off',
         '@typescript-eslint/no-unused-vars': [
             'error',
             {
@@ -38,6 +39,8 @@ module.exports = {
                 argsIgnorePattern: '^_',
             },
         ],
+        '@typescript-eslint/no-empty-interface': 'off',
+        "@typescript-eslint/explicit-module-boundary-types": "off"
     },
     settings: {
         react: {

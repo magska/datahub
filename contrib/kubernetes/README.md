@@ -1,7 +1,12 @@
-# Kubernetes  Setup for DataHub
+---
+title: "Deploying with Kubernetes"
+hide_title: true
+---
+
+# Kubernetes Setup for DataHub
 
 ## Introduction
-This directory provides the Kubernetes [Helm](https://helm.sh/) charts for DataHub. 
+[This directory](https://github.com/linkedin/datahub/tree/master/contrib/kubernetes/datahub) provides the Kubernetes [Helm](https://helm.sh/) charts for DataHub. 
 
 ## Setup
 This kubernetes deployment doesn't contain the below artifacts. The idea is to use the original helm charts for deploying each of these separately.   
@@ -31,10 +36,11 @@ The following table lists the configuration parameters and its default values
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://./charts/datahub-frontend | datahub-frontend | 0.2.0 |
-| file://./charts/datahub-gms | datahub-gms | 0.2.0 |
-| file://./charts/datahub-mae-consumer | datahub-mae-consumer | 0.2.0 |
-| file://./charts/datahub-mce-consumer | datahub-mce-consumer | 0.2.0 |
+| file://./charts/datahub-frontend | datahub-frontend | 0.2.1 |
+| file://./charts/datahub-gms | datahub-gms | 0.2.1 |
+| file://./charts/datahub-mae-consumer | datahub-mae-consumer | 0.2.1 |
+| file://./charts/datahub-mce-consumer | datahub-mce-consumer | 0.2.1 |
+| file://./charts/datahub-ingestion-cron | datahub-ingestion-cron | 0.2.1 |
 
 ## Install DataHub
 Navigate to the current directory and run the below command.  Update the `datahub/values.yaml` file with valid hostname/IP address configuration for elasticsearch, neo4j, schema-registry, broker & mysql. 

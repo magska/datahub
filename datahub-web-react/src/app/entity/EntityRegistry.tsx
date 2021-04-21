@@ -1,4 +1,5 @@
-import { EntityType } from '../../types.generated';
+import { EntityType, SearchResult } from '../../types.generated';
+import { FetchedEntity } from '../lineage/types';
 import { Entity, IconStyleType, PreviewType } from './Entity';
 
 function validatedGet<K, V>(key: K, map: Map<K, V>): V {
@@ -27,6 +28,10 @@ export default class EntityRegistry {
         this.pathNameToEntityType.set(entity.getPathName(), entity.type);
     }
 
+    getEntity(type: EntityType): Entity<any> {
+        return validatedGet(type, this.entityTypeToEntity);
+    }
+
     getEntities(): Array<Entity<any>> {
         return this.entities;
     }
@@ -40,6 +45,10 @@ export default class EntityRegistry {
     }
 
     getBrowseEntityTypes(): Array<EntityType> {
+        return this.entities.filter((entity) => entity.isBrowseEnabled()).map((entity) => entity.type);
+    }
+
+    getLineageEntityTypes(): Array<EntityType> {
         return this.entities.filter((entity) => entity.isBrowseEnabled()).map((entity) => entity.type);
     }
 
@@ -84,13 +93,18 @@ export default class EntityRegistry {
         return entity.renderPreview(type, data);
     }
 
-    renderSearchResult<T>(type: EntityType, data: T): JSX.Element {
+    renderSearchResult(type: EntityType, searchResult: SearchResult): JSX.Element {
         const entity = validatedGet(type, this.entityTypeToEntity);
-        return entity.renderPreview(PreviewType.SEARCH, data);
+        return entity.renderSearch(searchResult);
     }
 
     renderBrowse<T>(type: EntityType, data: T): JSX.Element {
         const entity = validatedGet(type, this.entityTypeToEntity);
         return entity.renderPreview(PreviewType.BROWSE, data);
+    }
+
+    getLineageVizConfig<T>(type: EntityType, data: T): FetchedEntity | undefined {
+        const entity = validatedGet(type, this.entityTypeToEntity);
+        return entity.getLineageVizConfig?.(data) || undefined;
     }
 }

@@ -1,18 +1,17 @@
 import { Alert } from 'antd';
 import React from 'react';
-import styled from 'styled-components';
-import { useGetDashboardQuery } from '../../../../graphql/dashboard.generated';
-import { Dashboard } from '../../../../types.generated';
+import {
+    GetDashboardDocument,
+    useGetDashboardQuery,
+    useUpdateDashboardMutation,
+} from '../../../../graphql/dashboard.generated';
+import { Dashboard, GlobalTags } from '../../../../types.generated';
 import { Ownership as OwnershipView } from '../../shared/Ownership';
 import { EntityProfile } from '../../../shared/EntityProfile';
 import DashboardHeader from './DashboardHeader';
 import DashboardCharts from './DashboardCharts';
 import { Message } from '../../../shared/Message';
-
-const PageContainer = styled.div`
-    background-color: white;
-    padding: 32px 100px;
-`;
+import TagGroup from '../../../shared/tags/TagGroup';
 
 export enum TabType {
     Ownership = 'Ownership',
@@ -26,6 +25,20 @@ const ENABLED_TAB_TYPES = [TabType.Ownership, TabType.Charts];
  */
 export default function DashboardProfile({ urn }: { urn: string }) {
     const { loading, error, data } = useGetDashboardQuery({ variables: { urn } });
+    const [updateDashboard] = useUpdateDashboardMutation({
+        update(cache, { data: newDashboard }) {
+            cache.modify({
+                fields: {
+                    dashboard() {
+                        cache.writeQuery({
+                            query: GetDashboardDocument,
+                            data: { dashboard: { ...newDashboard?.updateDashboard } },
+                        });
+                    },
+                },
+            });
+        },
+    });
 
     if (error || (!loading && !error && !data)) {
         return <Alert type="error" message={error?.message || 'Entity failed to load'} />;
@@ -63,18 +76,23 @@ export default function DashboardProfile({ urn }: { urn: string }) {
     };
 
     return (
-        <PageContainer>
-            <>
-                {loading && <Message type="loading" content="Loading..." style={{ marginTop: '10%' }} />}
-                {data && data.dashboard && (
-                    <EntityProfile
-                        title={data.dashboard.info?.name || ''}
-                        tags={[]}
-                        tabs={getTabs(data.dashboard as Dashboard)}
-                        header={getHeader(data.dashboard as Dashboard)}
-                    />
-                )}
-            </>
-        </PageContainer>
+        <>
+            {loading && <Message type="loading" content="Loading..." style={{ marginTop: '10%' }} />}
+            {data && data.dashboard && (
+                <EntityProfile
+                    title={data.dashboard.info?.name || ''}
+                    tags={
+                        <TagGroup
+                            editableTags={data.dashboard?.globalTags as GlobalTags}
+                            canAdd
+                            canRemove
+                            updateTags={(globalTags) => updateDashboard({ variables: { input: { urn, globalTags } } })}
+                        />
+                    }
+                    tabs={getTabs(data.dashboard as Dashboard)}
+                    header={getHeader(data.dashboard as Dashboard)}
+                />
+            )}
+        </>
     );
 }

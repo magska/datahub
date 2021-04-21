@@ -2,16 +2,7 @@ datahub
 =======
 A Helm chart for LinkedIn DataHub
 
-Current chart version is `0.1.1`
-
-## Chart Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-| file://./charts/datahub-frontend | datahub-frontend | 0.2.1 |
-| file://./charts/datahub-gms | datahub-gms | 0.2.1 |
-| file://./charts/datahub-mae-consumer | datahub-mae-consumer | 0.2.1 |
-| file://./charts/datahub-mce-consumer | datahub-mce-consumer | 0.2.1 |
+Current chart version is `0.1.2`
 
 #### Chart Values
 
@@ -29,6 +20,16 @@ Current chart version is `0.1.1`
 | datahub-mce-consumer.enabled | bool | `true` |  |
 | datahub-mce-consumer.image.repository | string | `"linkedin/datahub-mce-consumer"` |  |
 | datahub-mce-consumer.image.tag | string | `"latest"` |  |
+| datahub-ingestion-cron.enabled | bool | `false` | |
+| elasticsearchSetupJob.enabled | bool | `true` | |
+| elasticsearchSetupJob.image.repository | string | `"linkedin/datahub-elasticsearch-setup"` |  |
+| elasticsearchSetupJob.image.tag | string | `"latest"` |  |
+| kafkaSetupJob.enabled | bool | `true` | |
+| kafkaSetupJob.image.repository | string | `"linkedin/datahub-kafka-setup"` |  |
+| kafkaSetupJob.image.tag | string | `"latest"` |  |
+| mysqlSetupJob.enabled | bool | `false` | |
+| mysqlSetupJob.image.repository | string | `""` |  |
+| mysqlSetupJob.image.tag | string | `""` |  |
 | global.datahub.appVersion | string | `"1.0"` |  |
 | global.datahub.gms.port | string | `"8080"` |  |
 | global.elasticsearch.host | string | `"elasticsearch"` |  |
@@ -39,6 +40,7 @@ Current chart version is `0.1.1`
 | global.hostAliases[0].hostnames[3] | string | `"neo4j"` |  |
 | global.hostAliases[0].ip | string | `"192.168.0.104"` |  |
 | global.kafka.bootstrap.server | string | `"broker:29092"` |  |
+| global.kafka.zookeeper.server | string | `"zookeeper:2181"` |  |
 | global.kafka.schemaregistry.url | string | `"http://schema-registry:8081"` |  |
 | global.neo4j.host | string | `"neo4j:7474"` |  |
 | global.neo4j.uri | string | `"bolt://neo4j"` |  |
@@ -46,7 +48,8 @@ Current chart version is `0.1.1`
 | global.neo4j.password.secretRef | string | `"neo4j-secrets"` |  |
 | global.neo4j.password.secretKey | string | `"neo4j-password"` |  |
 | global.sql.datasource.driver | string | `"com.mysql.jdbc.Driver"` |  |
-| global.sql.datasource.host | string | `"mysql"` |  |
+| global.sql.datasource.host | string | `"mysql:3306"` |  |
+| global.sql.datasource.hostForMysqlClient | string | `"mysql"` |  |
 | global.sql.datasource.url | string | `"jdbc:mysql://mysql:3306/datahub?verifyServerCertificate=false\u0026useSSL=true"` |  |
 | global.sql.datasource.username | string | `"datahub"` |  |
 | global.sql.datasource.password.secretRef | string | `"mysql-secrets"` |  |
@@ -54,7 +57,9 @@ Current chart version is `0.1.1`
 
 #### Optional Chart Values
 
-| global.credentialsAndCertsSecretPath | string | `"/mnt/certs"` |  |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| global.credentialsAndCertsSecrets.path | string | `"/mnt/certs"` |  |
 | global.credentialsAndCertsSecrets.name | string | `""` |  |
-| global.credentialsAndCertsSecrets.secureEnv | string | `""` |  |
-| global.springKafkaConfigurationOverrides | string | `""` |  |
+| global.credentialsAndCertsSecrets.secureEnv | map | `{}` |  |
+| global.springKafkaConfigurationOverrides | map | `{}` |  |

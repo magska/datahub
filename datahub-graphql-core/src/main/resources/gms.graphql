@@ -45,6 +45,22 @@ enum EntityType {
     The Chart Entity
     """
     CHART
+    """
+    The Tag Entity
+    """
+    TAG
+    """
+    The MLModel Entity
+    """
+    MLMODEL
+    """
+    The DATA_FLOW Entity
+    """
+    DATA_FLOW
+    """
+    The DATA_JOB Entity
+    """
+    DATA_JOB
 }
 
 type Query {
@@ -67,6 +83,25 @@ type Query {
     Fetch a Chart by primary key
     """
     chart(urn: String!): Chart
+    """
+    Fetch a Tag by primary key
+    """
+    tag(urn: String!): Tag
+
+    """
+    Fetch a MLModel by primary key
+    """
+    mlModel(urn: String!): MLModel
+
+    """
+    Fetch a DataFlow by primary key
+    """
+    dataFlow(urn: String!): DataFlow
+
+    """
+    Fetch a DataJob by primary key
+    """
+    dataJob(urn: String!): DataJob
 
     """
     Search DataHub entities
@@ -91,6 +126,9 @@ type Query {
 
 type Mutation {
     updateDataset(input: DatasetUpdateInput!): Dataset
+    updateChart(input: ChartUpdateInput!): Chart
+    updateDashboard(input: DashboardUpdateInput!): Dashboard
+    updateTag(input: TagUpdate!): Tag
 }
 
 type AuditStamp {
@@ -177,6 +215,11 @@ type Dataset implements Entity {
     schema: Schema
 
     """
+    Editable schema metadata of the dataset
+    """
+    editableSchemaMetadata: EditableSchemaMetadata
+
+    """
     Status metadata of the dataset
     """
     status: Status
@@ -190,6 +233,11 @@ type Dataset implements Entity {
     Downstream Lineage metadata of the dataset
     """
     downstreamLineage: DownstreamLineage
+
+    """
+    The structured tags associated with the dataset
+    """
+    globalTags: GlobalTags
 }
 
 type DataPlatform implements Entity {
@@ -450,6 +498,31 @@ type SchemaField {
     Whether the field references its own type recursively
     """
     recursive: Boolean!
+    """
+    Tags associated with the field
+    """
+    globalTags: GlobalTags
+}
+
+type EditableSchemaMetadata {
+    editableSchemaFieldInfo: [EditableSchemaFieldInfo!]!
+}
+
+type EditableSchemaFieldInfo {
+    """
+    Flattened name of a field identifying the field the editable info is applied to
+    """
+    fieldPath: String!
+
+    """
+    Edited description of the field
+    """
+    description: String
+
+    """
+    Tags associated with the field
+    """
+    globalTags: GlobalTags
 }
 
 enum SchemaFieldDataType {
@@ -458,6 +531,8 @@ enum SchemaFieldDataType {
     STRING
     BYTES
     NUMBER
+    DATE
+    TIME
     ENUM
     NULL
     MAP
@@ -682,6 +757,11 @@ type CorpUser implements Entity {
     Writable info about the corp user
     """
     editableInfo: CorpUserEditableInfo
+
+    """
+    The structured tags associated with the user
+    """
+    globalTags: GlobalTags
 }
 
 type CorpUserInfo {
@@ -763,6 +843,33 @@ type CorpUserEditableInfo {
     pictureLink: String
 }
 
+type Tag implements Entity{
+    urn: String!
+    """
+    GMS Entity Type
+    """
+    type: EntityType!
+    name: String!
+
+    """
+    Description of the tag
+    """
+    description: String
+
+    """
+    Ownership metadata of the dataset
+    """
+    ownership: Ownership
+}
+
+type TagAssociation {
+    tag: Tag!
+}
+
+type GlobalTags {
+    tags: [TagAssociation!]
+}
+
 input SearchInput {
     """
     Entity type to be searched
@@ -802,6 +909,30 @@ input FacetFilterInput {
 	value: String!
 }
 
+type MatchedField {
+    """
+    Name of the field that matched
+    """
+    name: String!
+
+    """
+    Value of the field that matched
+    """
+    value: String!
+}
+
+type SearchResult {
+    """
+    Searched entity
+    """
+    entity: Entity!
+
+    """
+    Matched field names and their values
+    """
+    matchedFields: [MatchedField!]!
+}
+
 type SearchResults {
     """
     The starting point of paginated results
@@ -821,7 +952,7 @@ type SearchResults {
     """
     The search results
     """
-    entities: [Entity!]!
+    searchResults: [SearchResult!]!
 
     """
     Field aggregations used for faceted search
@@ -992,6 +1123,30 @@ type BrowsePath {
 	path: [String!]!
 }
 
+input ChartUpdateInput {
+   """
+   The chart urn
+   """
+   urn: String!
+
+   """
+   Update to global tags
+   """
+   globalTags: GlobalTagsUpdate
+}
+
+input DashboardUpdateInput {
+   """
+   The dashboard urn
+   """
+   urn: String!
+
+   """
+   Update to global tags
+   """
+   globalTags: GlobalTagsUpdate
+}
+
 input DatasetUpdateInput {
     """
     The dataset urn
@@ -1012,6 +1167,61 @@ input DatasetUpdateInput {
     Update to institutional memory, ie documentation
     """
     institutionalMemory: InstitutionalMemoryUpdate
+
+    """
+    Update to global tags
+    """
+    globalTags: GlobalTagsUpdate
+
+    """
+    Update to editable schema metadata of the dataset
+    """
+    editableSchemaMetadata: EditableSchemaMetadataUpdate
+}
+
+input EditableSchemaMetadataUpdate {
+    editableSchemaFieldInfo: [EditableSchemaFieldInfoUpdate!]!
+}
+
+input EditableSchemaFieldInfoUpdate {
+    """
+    Flattened name of a field identifying the field the editable info is applied to
+    """
+    fieldPath: String!
+
+    """
+    Edited description of the field
+    """
+    description: String
+
+    """
+    Tags associated with the field
+    """
+    globalTags: GlobalTagsUpdate
+}
+
+input GlobalTagsUpdate {
+    tags: [TagAssociationUpdate!]
+}
+
+input TagAssociationUpdate {
+    tag: TagUpdate!
+}
+
+input TagUpdate {
+    urn: String!
+
+    name: String!
+
+    """
+    Description of the tag
+    """
+    description: String
+
+    """
+    Ownership metadata of the tag
+    """
+    ownership: OwnershipUpdate
 }
 
 input OwnershipUpdate {
@@ -1114,6 +1324,11 @@ type Dashboard implements Entity {
     Status metadata of the dashboard
     """
     status: Status
+
+    """
+    The structured tags associated with the dashboard
+    """
+    globalTags: GlobalTags
 }
 
 type DashboardInfo {
@@ -1215,6 +1430,11 @@ type Chart implements Entity {
     Status metadata of the chart
     """
     status: Status
+
+    """
+    The structured tags associated with the chart
+    """
+    globalTags: GlobalTags
 }
 
 type ChartInfo {
@@ -1318,4 +1538,538 @@ enum ChartQueryType {
     LookML
     """
     LOOKML
+}
+
+type MLModel implements Entity {
+
+    """
+    The unique mlmodel URN
+    """
+    urn: String!
+
+    """
+    GMS Entity Type
+    """
+    type: EntityType!
+
+    """
+    MLModel native name
+    """
+    name: String!
+
+    """
+    Fabric type where mlmodel belongs to or where it was generated
+    """
+    origin: FabricType!
+
+    """
+    Human readable description for mlmodel
+    """
+    description: String
+
+    """
+    Tags used for searching mlmodel
+    """
+    tags: [String!]!
+
+    """
+    Ownership metadata of the mlmodel
+    """
+    ownership: Ownership
+
+    """
+    ModelProperties metadata of the mlmodel
+    """
+    properties: MLModelProperties
+
+    """
+    Intended use of the mlmodel
+    """
+    intendedUse: IntendedUse
+
+    """
+    Factors metadata of the mlmodel
+    """
+    factorPrompts: MLModelFactorPrompts
+
+    """
+    Metrics metadata of the mlmodel
+    """
+    metrics: Metrics
+
+    """
+    Evaluation Data of the mlmodel
+    """
+    evaluationData: [BaseData!]
+
+    """
+    Training Data of the mlmodel
+    """
+    trainingData: [BaseData!]
+
+    """
+    Quantitative Analyses of the mlmodel
+    """
+    quantitativeAnalyses: QuantitativeAnalyses
+
+    """
+    Ethical Considerations of the mlmodel
+    """
+    ethicalConsiderations: EthicalConsiderations
+
+    """
+    Caveats and Recommendations of the mlmodel
+    """
+    caveatsAndRecommendations: CaveatsAndRecommendations
+
+    """
+    References to internal resources related to the mlmodel
+    """
+    institutionalMemory: InstitutionalMemory
+
+    """
+    Source Code
+    """
+    sourceCode: SourceCode
+
+    """
+    Status metadata of the mlmodel
+    """
+    status: Status
+
+    """
+    Cost Aspect of the mlmodel
+    """
+    cost: Cost
+
+    """
+    Deprecation
+    """
+    deprecation: Deprecation
+}
+
+type MLModelProperties {
+
+    description: String
+
+    date: Long
+
+    version: String
+
+    type: String
+
+    hyperParameters: HyperParameterMap
+
+    mlFeatures: [String!]
+
+    tags: [String!]
+}
+
+type HyperParameterMap {
+    key: String!
+    value: HyperParameterValueType!
+}
+
+type StringBox {
+    stringValue: String!
+}
+
+type IntBox {
+    intValue: Int!
+}
+
+type FloatBox {
+    floatValue: Float!
+}
+
+type BooleanBox {
+    booleanValue: Boolean!
+}
+
+union HyperParameterValueType = StringBox | IntBox | FloatBox | BooleanBox
+
+type MLModelFactorPrompts {
+
+    """
+    What are foreseeable salient factors for which MLModel performance may vary, and how were these determined?
+    """
+    relevantFactors: [MLModelFactors!]
+
+    """
+    Which factors are being reported, and why were these chosen?
+    """
+    evaluationFactors: [MLModelFactors!]
+}
+
+type MLModelFactors {
+
+    """
+    Distinct categories with similar characteristics that are present in the evaluation data instances.
+    """
+    groups: [String!]
+
+    """
+    Instrumentation used for MLModel
+    """
+    instrumentation: [String!]
+
+    """
+    Environment in which the MLModel is deployed.
+    """
+    environment: [String!]
+}
+
+type QuantitativeAnalyses {
+    """
+    Link to a dashboard with results showing how the model performed with respect to each factor
+    """
+    unitaryResults: ResultsType
+
+    """
+    Link to a dashboard with results showing how the model performed with respect to the intersection of evaluated factors?
+    """
+    intersectionalResults: ResultsType
+}
+
+union ResultsType = StringBox
+
+type CaveatsAndRecommendations {
+
+    """
+    Caveats on using this MLModel
+    """
+    caveats: CaveatDetails
+
+    """
+    Recommendations on where this MLModel should be used.
+    """
+    recommendations: String
+
+    """
+    Ideal characteristics of an evaluation dataset for this MLModel
+    """
+    idealDatasetCharacteristics: [String!]
+}
+type CaveatDetails {
+
+    """
+    Did the results suggest any further testing?
+    """
+    needsFurtherTesting: Boolean
+
+    """
+    Caveat Description
+    """
+    caveatDescription: String
+
+    """
+    Relevant groups that were not represented in the evaluation dataset?
+    """
+    groupsNotRepresented: [String!]
+}
+
+type EthicalConsiderations {
+
+    """
+    Does the model use any sensitive data (e.g., protected classes)?
+    """
+    data: [String!]
+
+    """
+    Is the model intended to inform decisions about matters central to human life or flourishing – e.g., health or safety? Or could it be used in such a way?
+    """
+    humanLife: [String!]
+
+    """
+    What risk mitigation strategies were used during model development?
+    """
+    mitigations: [String!]
+
+    """
+    What risks may be present in model usage? Try to identify the potential recipients, likelihood, and magnitude of harms. If these cannot be determined, note that they were considered but remain unknown.
+    """
+    risksAndHarms: [String!]
+
+    """
+    Are there any known model use cases that are especially fraught? This may connect directly to the intended use section
+    """
+    useCases: [String!]
+}
+
+type BaseData {
+
+    """
+    Dataset used for the Training/Evaluation of the MLModel
+    """
+    dataset: String!
+
+    """
+    Motivation to pick these datasets
+    """
+    motivation: String
+
+    """
+    Details of Data Proprocessing
+    """
+    preProcessing: [String!]
+}
+
+type Metrics {
+
+    """
+    Measures of MLModel performance
+    """
+    performanceMeasures: [String!]
+
+    """
+    Decision Thresholds used (if any)?
+    """
+    decisionThreshold: [String!]
+
+}
+
+type IntendedUse {
+
+    """
+    Primary Use cases for the model.
+    """
+    primaryUses: [String!]
+
+    """
+    Primary Intended Users
+    """
+    primaryUsers: [IntendedUserType!]
+
+    """
+    Out of scope uses of the MLModel
+    """
+    outOfScopeUses: [String!]
+}
+
+enum IntendedUserType {
+
+    """
+    Developed for Enterprise Users
+    """
+    ENTERPRISE
+
+    """
+    Developed for Hobbyists
+    """
+    HOBBY
+
+    """
+    Developed for Entertainment Purposes
+    """
+    ENTERTAINMENT
+}
+
+type SourceCode {
+    """
+    Source Code along with types
+    """
+    sourceCode: [SourceCodeUrl!]
+}
+
+type SourceCodeUrl {
+
+    """
+    Source Code Url Types
+    """
+    type: SourceCodeUrlType!
+
+    """
+    Source Code Url
+    """
+    sourceCodeUrl: String!
+}
+
+enum SourceCodeUrlType {
+
+    """
+    MLModel Source Code
+    """
+    ML_MODEL_SOURCE_CODE
+
+    """
+    Training Pipeline Source Code
+    """
+    TRAINING_PIPELINE_SOURCE_CODE
+
+    """
+    Evaluation Pipeline Source Code
+    """
+    EVALUATION_PIPELINE_SOURCE_CODE
+}
+
+type Cost {
+
+    """
+    Type of Cost Code
+    """
+    costType: CostType!
+
+    """
+    Code to which the Cost of this entity should be attributed to i.e. organizational cost ID
+    """
+    costValue: CostValue!
+}
+
+type CostValue {
+
+    """
+    Organizational Cost ID
+    """
+    costId: Float
+
+    """
+    Organizational Cost Code
+    """
+    costCode: String
+}
+
+enum CostType {
+
+    """
+    Org Cost Type to which the Cost of this entity should be attributed to
+    """
+    ORG_COST_TYPE
+}
+
+type Deprecation {
+    """
+    Whether the entity has been deprecated by owner
+    """
+    deprecated: Boolean!
+
+    """
+    The time user plan to decommission this entity
+    """
+    decommissionTime: Long
+
+    """
+    Additional information about the entity deprecation plan
+    """
+    note: String!
+
+    """
+    The user who will be credited for modifying this deprecation content
+    """
+    actor: String
+}
+
+type DataFlow implements Entity {
+    """
+    The unique flow URN
+    """
+    urn: String!
+
+    """
+    GMS Entity Type
+    """
+    type: EntityType!
+
+    """
+    Workflow orchestrator ex: Azkaban, Airflow
+    """
+    orchestrator: String!
+
+    """
+    Id of the flow
+    """
+    flowId: String!
+
+    """
+    Cluster of the flow
+    """
+    cluster: String!
+
+    """
+    Information about a Data processing flow
+    """
+    info: DataFlowInfo
+
+    """
+    Ownership metadata of the flow
+    """
+    ownership: Ownership
+}
+
+type DataFlowInfo {
+    """
+    Name of the flow
+    """
+    name: String!
+
+    """
+    Description of the flow
+    """
+    description: String
+
+    """
+    Optional project/namespace associated with the flow
+    """
+    project: String
+}
+
+
+type DataJob implements Entity {
+    """
+    The unique job URN
+    """
+    urn: String!
+
+    """
+    GMS Entity Type
+    """
+    type: EntityType!
+
+    """
+    The associated data flow
+    """
+    dataFlow: DataFlow!
+
+    """
+    Id of the job
+    """
+    jobId: String!
+
+    """
+    Ownership metadata of the job
+    """
+    ownership: Ownership
+
+    """
+    Information about the inputs and outputs of a Data processing job
+    """
+    inputOutput: DataJobInputOutput
+
+    """
+    Information about a Data processing job
+    """
+    info: DataJobInfo
+}
+
+type DataJobInfo {
+    """
+    Job name
+    """
+    name: String!
+
+    """
+    Job description
+    """
+    description: String
+}
+
+type DataJobInputOutput {
+    """
+    Input datasets produced by the data job during processing
+    """
+    inputDatasets: [Dataset!]
+
+    """
+    Output datasets produced by the data job during processing
+    """
+    outputDatasets: [Dataset!]
 }
