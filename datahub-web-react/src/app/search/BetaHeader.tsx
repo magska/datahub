@@ -29,17 +29,24 @@ const styles = {
 
 /**
  * A header with just a text announcement.
+ *
+ * <HeaderTitle level={4}>
+ * This is a Beta release of the data catalog. More information&nbsp;
+ * <a href="https://klub.klarna.net/team/data-exploration-security/?page_id=311">here</a>. General
+ * feedback&nbsp;
+ * <a href="https://docs.google.com/forms/d/1U5mTbLDanpwbppx9afwPk5Adi1IctsGWYRRfOh0r7Dg">here</a>. Dataset
+ * quality feedback&nbsp;
+ * <a href="https://docs.google.com/forms/d/1UtWZEo0Tpx5BsPxMAM1Rl82_WVeJdwwbbHkHnGxhNLM">here</a>.
+ * </HeaderTitle>
+ *
+ *
  */
 export const BetaHeader = () => {
     return (
         <Header style={styles.header as any}>
             <HeaderTitle level={4}>
-                This is a Beta release of the data catalog. More information&nbsp;
-                <a href="https://klub.klarna.net/team/data-exploration-security/?page_id=311">here</a>. General
-                feedback&nbsp;
-                <a href="https://docs.google.com/forms/d/1U5mTbLDanpwbppx9afwPk5Adi1IctsGWYRRfOh0r7Dg">here</a>. Dataset
-                quality feedback&nbsp;
-                <a href="https://docs.google.com/forms/d/1UtWZEo0Tpx5BsPxMAM1Rl82_WVeJdwwbbHkHnGxhNLM">here</a>.
+                Notice: The catalog will be upgraded around 08.00 CEST 2021-09-01. During that time the catalog may
+                appear empty while the data is being re-ingested.
             </HeaderTitle>
         </Header>
     );
