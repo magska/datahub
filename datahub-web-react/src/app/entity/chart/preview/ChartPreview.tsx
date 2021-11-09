@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccessLevel, EntityType, GlobalTags, Owner } from '../../../../types.generated';
+import { AccessLevel, EntityType, GlobalTags, GlossaryTerms, Owner, SearchInsight } from '../../../../types.generated';
 import DefaultPreviewCard from '../../../preview/DefaultPreviewCard';
 import { useEntityRegistry } from '../../../useEntityRegistry';
 import { getLogoFromPlatform } from '../../../shared/getLogoFromPlatform';
@@ -13,6 +13,8 @@ export const ChartPreview = ({
     access,
     owners,
     tags,
+    glossaryTerms,
+    insights,
 }: {
     urn: string;
     platform: string;
@@ -21,13 +23,15 @@ export const ChartPreview = ({
     access?: AccessLevel | null;
     owners?: Array<Owner> | null;
     tags?: GlobalTags;
+    glossaryTerms?: GlossaryTerms | null;
+    insights?: Array<SearchInsight> | null;
 }): JSX.Element => {
     const entityRegistry = useEntityRegistry();
     const capitalizedPlatform = capitalizeFirstLetter(platform);
 
     return (
         <DefaultPreviewCard
-            url={`/${entityRegistry.getPathName(EntityType.Chart)}/${urn}`}
+            url={entityRegistry.getEntityUrl(EntityType.Chart, urn)}
             name={name || ''}
             description={description || ''}
             type="Chart"
@@ -35,15 +39,9 @@ export const ChartPreview = ({
             platform={capitalizedPlatform}
             qualifier={access}
             tags={tags}
-            owners={
-                owners?.map((owner) => {
-                    return {
-                        urn: owner.owner.urn,
-                        name: owner.owner.info?.fullName || '',
-                        photoUrl: owner.owner.editableInfo?.pictureLink || '',
-                    };
-                }) || []
-            }
+            owners={owners}
+            glossaryTerms={glossaryTerms || undefined}
+            insights={insights}
         />
     );
 };

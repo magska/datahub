@@ -47,6 +47,25 @@ can run the following in this directory:
 which will start a forwarding server at `localhost:3000`. Note that to fetch real data, `datahub-frontend` server will also
 need to be deployed, still at `http://localhost:9002`, to service GraphQL API requests.
 
+Optionally you could also start the app with the mock server without running the docker containers by executing `yarn start:mock`. See [here](src/graphql-mock/fixtures/searchResult/userSearchResult.ts#L6) for available login users.
+
+### Functional testing
+
+Automated functional testing is powered by Cypress and MirageJS. When running the web server with Cypress the port is set to 3010 so that the usual web server running on port 3000 used for development can be started without interruptions.
+
+#### During development
+
+`yarn test:e2e`
+
+#### CI
+
+`yarn test:e2e:ci`
+
+#### Troubleshooting
+`Error: error:0308010C:digital envelope routines::unsupported`: This error message shows up when using Node 17, due to an OpenSSL update related to md5.  
+The best workaround is to revert to the Active LTS version of Node, 16.13.0 with the command `nvm install 16.13.0` and if necessary reinstall yarn `npm install --global yarn`.
+
+
 ### Theming
 
 #### Selecting a theme

@@ -4,7 +4,7 @@ fragment dataFlowFields on DataFlow {
     orchestrator
     flowId
     cluster
-    info {
+    properties {
         name
         description
         project
@@ -14,22 +14,77 @@ fragment dataFlowFields on DataFlow {
             value
         }
     }
+    editableProperties {
+        description
+    }
     ownership {
         ...ownershipFields
     }
     globalTags {
         ...globalTagsFields
     }
+    institutionalMemory {
+        elements {
+            url
+            author {
+                urn
+                username
+            }
+            label
+            created {
+                time
+                actor
+            }
+        }
+    }
+    glossaryTerms {
+        ...glossaryTerms
+    }
 }
 
 query getDataFlow($urn: String!) {
     dataFlow(urn: $urn) {
         ...dataFlowFields
+        childJobs: relationships(input: { types: ["IsPartOf"], direction: INCOMING, start: 0, count: 100 }) {
+            start
+            count
+            total
+            relationships {
+                entity {
+                    ... on DataJob {
+                        urn
+                        type
+                        jobId
+                        dataFlow {
+                            urn
+                            type
+                            orchestrator
+                        }
+                        ownership {
+                            ...ownershipFields
+                        }
+                        properties {
+                            name
+                            description
+                        }
+                        editableProperties {
+                            description
+                        }
+                        globalTags {
+                            ...globalTagsFields
+                        }
+                        glossaryTerms {
+                            ...glossaryTerms
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
-mutation updateDataFlow($input: DataFlowUpdateInput!) {
-    updateDataFlow(input: $input) {
-        ...dataFlowFields
+mutation updateDataFlow($urn: String!, $input: DataFlowUpdateInput!) {
+    updateDataFlow(urn: $urn, input: $input) {
+        urn
     }
 }

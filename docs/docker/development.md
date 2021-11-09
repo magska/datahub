@@ -25,7 +25,7 @@ you need to make two small edits (don't check these changes in!).
 
 For example, to debug `datahub-gms`:
 
-```sh
+```shell
 # Add this line to docker/datahub-gms/env/docker.env. You can change the port and/or change suspend=n to y.
 JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n
 ```
@@ -59,6 +59,12 @@ applies.
 
 > Note this only removes containers, not images. Should still be fast to switch between these once you've launched both
 > at least once.
+
+### Unexpected character
+
+If you are using Windows WSL (with Ubuntu) and receive an error of 'unexpected character "." in variable name...' while executing `docker/dev.sh` try these steps: 
+- Open up Docker Desktop, click gear icon at top to open the settings and uncheck the "Use Docker Compose V2" option.  Close your terminal, open a new one and try to rerun the command `docker/dev.sh`.
+- Next, try `sudo docker/dev.sh` and finally, try moving the file `~/.docker/config.json` to `~/.docker/config.json.bak` and retry the command with `sudo`.
 
 ### Running a specific service
 

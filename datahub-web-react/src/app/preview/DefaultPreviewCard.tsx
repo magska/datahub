@@ -1,99 +1,188 @@
-import { Avatar, Divider, Image, Row, Space, Tag, Typography } from 'antd';
-import React from 'react';
+import { Image, Typography } from 'antd';
+import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { EntityType, GlobalTags } from '../../types.generated';
+import { GlobalTags, Owner, GlossaryTerms, SearchInsight } from '../../types.generated';
 import { useEntityRegistry } from '../useEntityRegistry';
-import CustomAvatar from '../shared/avatar/CustomAvatar';
-import TagGroup from '../shared/tags/TagGroup';
+import AvatarsGroup from '../shared/avatar/AvatarsGroup';
+import TagTermGroup from '../shared/tags/TagTermGroup';
+import { ANTD_GRAY } from '../entity/shared/constants';
+import NoMarkdownViewer from '../entity/shared/components/styled/StripMarkdownText';
 
 interface Props {
     name: string;
     logoUrl?: string;
+    logoComponent?: JSX.Element;
     url: string;
-    description: string;
+    description?: string;
     type?: string;
     platform?: string;
     qualifier?: string | null;
     tags?: GlobalTags;
-    owners?: Array<{ urn: string; name?: string; photoUrl?: string }>;
+    owners?: Array<Owner> | null;
     snippet?: React.ReactNode;
+    insights?: Array<SearchInsight> | null;
+    glossaryTerms?: GlossaryTerms;
+    dataTestID?: string;
+    titleSizePx?: number;
+    onClick?: () => void;
 }
 
-const DescriptionParagraph = styled(Typography.Paragraph)`
+const PreviewContainer = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const PlatformInfo = styled.div`
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    height: 24px;
+`;
+
+const TitleContainer = styled.div`
+    margin-bottom: 8px;
+`;
+
+const PreviewImage = styled(Image)`
+    max-height: 18px;
+    width: auto;
+    object-fit: contain;
+    margin-right: 10px;
+    background-color: transparent;
+`;
+
+const EntityTitle = styled(Typography.Text)<{ $titleSizePx?: number }>`
     &&& {
-        margin-bottom: 0px;
-        padding-left: 8px;
+        margin-bottom: 0;
+        font-size: ${(props) => props.$titleSizePx || 16}px;
+        font-weight: 600;
+        vertical-align: middle;
     }
 `;
 
-const styles = {
-    row: { width: '100%', marginBottom: '0px' },
-    leftColumn: { maxWidth: '75%' },
-    rightColumn: { maxWidth: '25%' },
-    logoImage: { width: '48px' },
-    name: { fontSize: '18px' },
-    typeName: { color: '#585858' },
-    platformName: { color: '#585858' },
-    ownedBy: { color: '#585858' },
-};
+const PlatformText = styled(Typography.Text)`
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 700;
+    color: ${ANTD_GRAY[7]};
+`;
+
+const PlatformDivider = styled.div`
+    display: inline-block;
+    padding-left: 10px;
+    margin-right: 10px;
+    border-right: 1px solid ${ANTD_GRAY[4]};
+    height: 21px;
+    vertical-align: text-top;
+`;
+
+const DescriptionContainer = styled.div`
+    margin-top: 5px;
+    color: ${ANTD_GRAY[7]};
+`;
+
+const AvatarContainer = styled.div`
+    margin-top: 12px;
+    margin-right: 32px;
+`;
+
+const TagContainer = styled.div`
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: -2px;
+`;
+
+const InsightContainer = styled.div`
+    margin-top: 12px;
+`;
+
+const InsightsText = styled(Typography.Text)`
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 600;
+    color: ${ANTD_GRAY[7]};
+`;
+
+const InsightIconContainer = styled.span`
+    margin-right: 4px;
+`;
 
 export default function DefaultPreviewCard({
     name,
     logoUrl,
+    logoComponent,
     url,
     description,
     type,
     platform,
+    // TODO(Gabe): support qualifier in the new preview card
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     qualifier,
     tags,
     owners,
     snippet,
+    insights,
+    glossaryTerms,
+    titleSizePx,
+    dataTestID,
+    onClick,
 }: Props) {
     const entityRegistry = useEntityRegistry();
+    const insightViews: Array<ReactNode> = [
+        ...(insights?.map((insight) => (
+            <>
+                <InsightIconContainer>{insight.icon}</InsightIconContainer>
+                <InsightsText>{insight.text}</InsightsText>
+            </>
+        )) || []),
+    ];
+    if (snippet) {
+        insightViews.push(snippet);
+    }
     return (
-        <Row style={styles.row} justify="space-between">
-            <Space direction="vertical" align="start" size={28} style={styles.leftColumn}>
-                <Link to={url}>
-                    <Space direction="horizontal" size={20} align="center">
-                        {logoUrl && <Image style={styles.logoImage} src={logoUrl} preview />}
-                        <Space direction="vertical" size={8}>
-                            <Typography.Text strong style={styles.name}>
-                                {name}
-                            </Typography.Text>
-                            <Space split={<Divider type="vertical" />} size={16}>
-                                <Typography.Text>{type}</Typography.Text>
-                                <Typography.Text strong>{platform}</Typography.Text>
-                                {qualifier && <Tag>{qualifier}</Tag>}
-                            </Space>
-                        </Space>
-                    </Space>
-                </Link>
-                <div>
-                    {description.length === 0 ? (
-                        <DescriptionParagraph type="secondary">No description</DescriptionParagraph>
-                    ) : (
-                        <DescriptionParagraph>{description}</DescriptionParagraph>
-                    )}
-                    {snippet}
-                </div>
-            </Space>
-            <Space direction="vertical" align="end" size={36} style={styles.rightColumn}>
-                <Space direction="vertical" size={12}>
-                    <Typography.Text strong>{owners && owners.length > 0 ? 'Owned By' : ''}</Typography.Text>
-                    <Avatar.Group maxCount={4}>
-                        {owners?.map((owner) => (
-                            <CustomAvatar
-                                key={owner.urn}
-                                name={owner.name}
-                                url={`/${entityRegistry.getPathName(EntityType.CorpUser)}/${owner.urn}`}
-                                photoUrl={owner.photoUrl}
-                            />
+        <PreviewContainer data-testid={dataTestID}>
+            <div>
+                <TitleContainer>
+                    <Link to={url}>
+                        <PlatformInfo>
+                            {(logoUrl && <PreviewImage preview={false} src={logoUrl} alt={platform || ''} />) ||
+                                logoComponent}
+                            {platform && <PlatformText>{platform}</PlatformText>}
+                            <PlatformDivider />
+                            <PlatformText>{type}</PlatformText>
+                        </PlatformInfo>
+                        <EntityTitle onClick={onClick} $titleSizePx={titleSizePx}>
+                            {name || ' '}
+                        </EntityTitle>
+                    </Link>
+                    <TagContainer>
+                        <TagTermGroup uneditableGlossaryTerms={glossaryTerms} uneditableTags={tags} maxShow={3} />
+                    </TagContainer>
+                </TitleContainer>
+                {description && description.length > 0 && (
+                    <DescriptionContainer>
+                        <NoMarkdownViewer limit={200}>{description}</NoMarkdownViewer>
+                    </DescriptionContainer>
+                )}
+                {owners && owners.length > 0 && (
+                    <AvatarContainer>
+                        <AvatarsGroup size={28} owners={owners} entityRegistry={entityRegistry} maxCount={4} />
+                    </AvatarContainer>
+                )}
+                {insightViews.length > 0 && (
+                    <InsightContainer>
+                        {insightViews.map((insightView, index) => (
+                            <span>
+                                {insightView}
+                                {index < insightViews.length - 1 && <PlatformDivider />}
+                            </span>
                         ))}
-                    </Avatar.Group>
-                </Space>
-                <TagGroup editableTags={tags} maxShow={3} />
-            </Space>
-        </Row>
+                    </InsightContainer>
+                )}
+            </div>
+        </PreviewContainer>
     );
 }

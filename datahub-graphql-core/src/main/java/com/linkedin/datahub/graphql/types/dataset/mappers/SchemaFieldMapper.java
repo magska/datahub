@@ -3,6 +3,7 @@ package com.linkedin.datahub.graphql.types.dataset.mappers;
 import com.linkedin.datahub.graphql.generated.SchemaField;
 import com.linkedin.datahub.graphql.generated.SchemaFieldDataType;
 import com.linkedin.datahub.graphql.types.tag.mappers.GlobalTagsMapper;
+import com.linkedin.datahub.graphql.types.glossary.mappers.GlossaryTermsMapper;
 import com.linkedin.datahub.graphql.types.mappers.ModelMapper;
 
 import javax.annotation.Nonnull;
@@ -27,7 +28,12 @@ public class SchemaFieldMapper implements ModelMapper<com.linkedin.schema.Schema
         result.setType(mapSchemaFieldDataType(input.getType()));
         if (input.hasGlobalTags()) {
             result.setGlobalTags(GlobalTagsMapper.map(input.getGlobalTags()));
+            result.setTags(GlobalTagsMapper.map(input.getGlobalTags()));
         }
+        if (input.hasGlossaryTerms()) {
+            result.setGlossaryTerms(GlossaryTermsMapper.map(input.getGlossaryTerms()));
+        }
+        result.setIsPartOfKey(input.isIsPartOfKey());
         return result;
     }
 

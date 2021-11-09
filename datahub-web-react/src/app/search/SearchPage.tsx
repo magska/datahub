@@ -1,37 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import * as QueryString from 'query-string';
 import { useHistory, useLocation, useParams } from 'react-router';
-import { Affix, Tabs } from 'antd';
-import styled from 'styled-components';
+import { Alert } from 'antd';
 
 import { SearchablePage } from './SearchablePage';
 import { useEntityRegistry } from '../useEntityRegistry';
-import { FacetFilterInput } from '../../types.generated';
+import { FacetFilterInput, EntityType } from '../../types.generated';
 import useFilters from './utils/useFilters';
 import { navigateToSearchUrl } from './utils/navigateToSearchUrl';
-import { EntitySearchResults } from './EntitySearchResults';
-import { IconStyleType } from '../entity/Entity';
-import { AllEntitiesSearchResults } from './AllEntitiesSearchResults';
-
-const ALL_ENTITIES_TAB_NAME = 'All';
-
-const StyledTabs = styled(Tabs)`
-     {
-        background-color: ${(props) => props.theme.styles['body-background']};
-        .ant-tabs-nav {
-            padding-left: 165px;
-            margin-bottom: 0px;
-        }
-        padding-top: 12px;
-        margin-bottom: 16px;
-    }
-`;
-
-const StyledTab = styled.span`
-    &&& {
-        font-size: 20px;
-    }
-`;
+import { SearchResults } from './SearchResults';
+import analytics, { EventType } from '../analytics';
+import { useGetSearchResultsForMultipleQuery } from '../../graphql/search.generated';
+import { SearchCfg } from '../../conf';
+import { ENTITY_FILTER_NAME } from './utils/constants';
 
 type SearchPageParams = {
     type?: string;
@@ -45,69 +26,78 @@ export const SearchPage = () => {
     const location = useLocation();
 
     const entityRegistry = useEntityRegistry();
-    const searchTypes = entityRegistry.getSearchEntityTypes();
 
     const params = QueryString.parse(location.search, { arrayFormat: 'comma' });
-    const activeType = entityRegistry.getTypeOrDefaultFromPathName(useParams<SearchPageParams>().type || '', undefined);
     const query: string = params.query ? (params.query as string) : '';
+    const activeType = entityRegistry.getTypeOrDefaultFromPathName(useParams<SearchPageParams>().type || '', undefined);
     const page: number = params.page && Number(params.page as string) > 0 ? Number(params.page as string) : 1;
     const filters: Array<FacetFilterInput> = useFilters(params);
+    const filtersWithoutEntities: Array<FacetFilterInput> = filters.filter(
+        (filter) => filter.field !== ENTITY_FILTER_NAME,
+    );
+    const entityFilters: Array<EntityType> = filters
+        .filter((filter) => filter.field === ENTITY_FILTER_NAME)
+        .map((filter) => filter.value.toUpperCase() as EntityType);
 
-    const onSearch = (q: string) => {
-        navigateToSearchUrl({ type: activeType, query: q, page: 1, history, entityRegistry });
-    };
+    const { data, loading, error } = useGetSearchResultsForMultipleQuery({
+        variables: {
+            input: {
+                types: entityFilters,
+                query,
+                start: (page - 1) * SearchCfg.RESULTS_PER_PAGE,
+                count: SearchCfg.RESULTS_PER_PAGE,
+                filters: filtersWithoutEntities,
+            },
+        },
+    });
 
-    const onChangeSearchType = (newType: string) => {
-        if (newType === ALL_ENTITIES_TAB_NAME) {
-            navigateToSearchUrl({ query, page: 1, history, entityRegistry });
-        } else {
-            const entityType = entityRegistry.getTypeFromCollectionName(newType);
-            navigateToSearchUrl({ type: entityType, query, page: 1, history, entityRegistry });
+    useEffect(() => {
+        if (!loading) {
+            analytics.event({
+                type: EventType.SearchResultsViewEvent,
+                query,
+                total: data?.searchAcrossEntities?.count || 0,
+            });
         }
+    }, [query, data, loading]);
+
+    const onSearch = (q: string, type?: EntityType) => {
+        if (q.trim().length === 0) {
+            return;
+        }
+        analytics.event({
+            type: EventType.SearchEvent,
+            query: q,
+            entityTypeFilter: activeType,
+            pageNumber: 1,
+            originPath: window.location.pathname,
+        });
+        navigateToSearchUrl({ type: type || activeType, query: q, page: 1, history });
     };
 
     const onChangeFilters = (newFilters: Array<FacetFilterInput>) => {
-        navigateToSearchUrl({ type: activeType, query, page: 1, filters: newFilters, history, entityRegistry });
+        navigateToSearchUrl({ type: activeType, query, page: 1, filters: newFilters, history });
     };
 
     const onChangePage = (newPage: number) => {
-        navigateToSearchUrl({ type: activeType, query, page: newPage, filters, history, entityRegistry });
+        navigateToSearchUrl({ type: activeType, query, page: newPage, filters, history });
     };
 
     return (
         <SearchablePage initialQuery={query} onSearch={onSearch}>
-            <Affix offsetTop={80}>
-                <StyledTabs
-                    activeKey={activeType ? entityRegistry.getCollectionName(activeType) : ALL_ENTITIES_TAB_NAME}
-                    size="large"
-                    onChange={onChangeSearchType}
-                >
-                    <Tabs.TabPane tab={<StyledTab>All</StyledTab>} key={ALL_ENTITIES_TAB_NAME} />
-                    {searchTypes.map((t) => (
-                        <Tabs.TabPane
-                            tab={
-                                <>
-                                    {entityRegistry.getIcon(t, 16, IconStyleType.TAB_VIEW)}
-                                    <StyledTab>{entityRegistry.getCollectionName(t)}</StyledTab>
-                                </>
-                            }
-                            key={entityRegistry.getCollectionName(t)}
-                        />
-                    ))}
-                </StyledTabs>
-            </Affix>
-            {activeType ? (
-                <EntitySearchResults
-                    type={activeType}
-                    page={page}
-                    query={query}
-                    filters={filters}
-                    onChangeFilters={onChangeFilters}
-                    onChangePage={onChangePage}
-                />
-            ) : (
-                <AllEntitiesSearchResults query={query} />
+            {!loading && error && (
+                <Alert type="error" message={error?.message || `Search failed to load for query ${query}`} />
             )}
+            <SearchResults
+                page={page}
+                query={query}
+                searchResponse={data?.searchAcrossEntities}
+                filters={data?.searchAcrossEntities?.facets}
+                selectedFilters={filters}
+                loading={loading}
+                onChangeFilters={onChangeFilters}
+                onChangePage={onChangePage}
+            />
         </SearchablePage>
     );
 };

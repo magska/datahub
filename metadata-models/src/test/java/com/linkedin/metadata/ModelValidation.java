@@ -5,12 +5,10 @@ import com.linkedin.data.template.RecordTemplate;
 import com.linkedin.data.template.UnionTemplate;
 import com.linkedin.metadata.validator.AspectValidator;
 import com.linkedin.metadata.validator.DeltaValidator;
-import com.linkedin.metadata.validator.DocumentValidator;
 import com.linkedin.metadata.validator.EntityValidator;
 import com.linkedin.metadata.validator.RelationshipValidator;
 import com.linkedin.metadata.validator.SnapshotValidator;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,15 +40,6 @@ public class ModelValidation {
   }
 
   @Test
-  public void validateDocuments() throws Exception {
-    List<? extends Class<? extends RecordTemplate>> documents =
-        getRecordTemplatesInPackage("com.linkedin.metadata.search", IGNORED_DOCUMENT_CLASSES);
-
-    assertFalse("Failed to find any relationships", documents.isEmpty());
-    documents.forEach(DocumentValidator::validateDocumentSchema);
-  }
-
-  @Test
   public void validateAspects() throws Exception {
     List<? extends Class<? extends UnionTemplate>> aspects =
         getUnionTemplatesInPackage("com.linkedin.metadata.aspect", IGNORED_ASPECT_CLASSES);
@@ -67,7 +56,6 @@ public class ModelValidation {
 
     assertFalse("Failed to find any snapshots", snapshots.isEmpty());
     snapshots.forEach(SnapshotValidator::validateSnapshotSchema);
-    SnapshotValidator.validateUniqueUrn((Collection<Class<? extends RecordTemplate>>) snapshots);
   }
 
   @Test

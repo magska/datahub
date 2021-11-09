@@ -1,5 +1,5 @@
 import React from 'react';
-import { EntityType, FabricType, Owner, GlobalTags } from '../../../../types.generated';
+import { EntityType, FabricType, Owner, GlobalTags, GlossaryTerms, SearchInsight } from '../../../../types.generated';
 import DefaultPreviewCard from '../../../preview/DefaultPreviewCard';
 import { useEntityRegistry } from '../../../useEntityRegistry';
 import { capitalizeFirstLetter } from '../../../shared/capitalizeFirstLetter';
@@ -14,6 +14,9 @@ export const Preview = ({
     owners,
     globalTags,
     snippet,
+    insights,
+    glossaryTerms,
+    subtype,
 }: {
     urn: string;
     name: string;
@@ -24,29 +27,26 @@ export const Preview = ({
     owners?: Array<Owner> | null;
     globalTags?: GlobalTags | null;
     snippet?: React.ReactNode | null;
+    insights?: Array<SearchInsight> | null;
+    glossaryTerms?: GlossaryTerms | null;
+    subtype?: string | null;
 }): JSX.Element => {
     const entityRegistry = useEntityRegistry();
     const capitalPlatformName = capitalizeFirstLetter(platformName);
     return (
         <DefaultPreviewCard
-            url={`/${entityRegistry.getPathName(EntityType.Dataset)}/${urn}`}
+            url={entityRegistry.getEntityUrl(EntityType.Dataset, urn)}
             name={name || ''}
             description={description || ''}
-            type="Dataset"
+            type={capitalizeFirstLetter(subtype) || 'Dataset'}
             logoUrl={platformLogo || ''}
             platform={capitalPlatformName}
             qualifier={origin}
             tags={globalTags || undefined}
-            owners={
-                owners?.map((owner) => {
-                    return {
-                        urn: owner.owner.urn,
-                        name: owner.owner.info?.fullName || '',
-                        photoUrl: owner.owner.editableInfo?.pictureLink || '',
-                    };
-                }) || []
-            }
+            owners={owners}
             snippet={snippet}
+            glossaryTerms={glossaryTerms || undefined}
+            insights={insights}
         />
     );
 };

@@ -3,6 +3,9 @@ namespace com.linkedin.chart
 /**
  * Information for chart query which is used for getting data of the chart
  */
+@Aspect = {
+  "name": "chartQuery"
+}
 record ChartQuery {
 
   /**
@@ -13,5 +16,11 @@ record ChartQuery {
   /**
    * Chart query type
    */
+  @Searchable = {
+    "fieldName": "queryType",
+    "fieldType": "KEYWORD",
+    "addToFilters": true,
+    "filterNameOverride": "Query Type"
+  }
   type: ChartQueryType
 }

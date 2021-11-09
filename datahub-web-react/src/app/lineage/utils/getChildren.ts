@@ -1,28 +1,43 @@
-import { Direction, EntityAndType } from '../types';
+import { EntityAndType } from '../types';
+import { EntityRelationshipsResult, RelationshipDirection } from '../../../types.generated';
+import { FORWARD_RELATIONSHIPS, INVERSE_RELATIONSHIPS } from '../constants';
 
-export default function getChildren(entityAndType: EntityAndType, direction: Direction | null): Array<EntityAndType> {
-    if (direction === Direction.Upstream) {
-        return (
-            entityAndType.entity.upstreamLineage?.entities?.map(
-                (entity) =>
-                    ({
-                        type: entity?.entity?.type,
-                        entity: entity?.entity,
-                    } as EntityAndType),
-            ) || []
-        );
-    }
-    if (direction === Direction.Downstream) {
-        return (
-            entityAndType.entity.downstreamLineage?.entities?.map(
-                (entity) =>
-                    ({
-                        type: entity?.entity?.type,
-                        entity: entity?.entity,
-                    } as EntityAndType),
-            ) || []
-        );
-    }
+export function getChildrenFromRelationships({
+    incomingRelationships,
+    outgoingRelationships,
+    direction,
+}: {
+    incomingRelationships: EntityRelationshipsResult | null | undefined;
+    outgoingRelationships: EntityRelationshipsResult | null | undefined;
+    direction: RelationshipDirection;
+}) {
+    return [
+        ...(incomingRelationships?.relationships || []).filter((relationship) => {
+            if (FORWARD_RELATIONSHIPS.indexOf(relationship.type) >= 0) {
+                if (direction === relationship.direction) {
+                    return true;
+                }
+            }
+            if (INVERSE_RELATIONSHIPS.indexOf(relationship.type) >= 0) {
+                if (direction !== relationship.direction) {
+                    return true;
+                }
+            }
+            return false;
+        }),
 
-    return [];
+        ...(outgoingRelationships?.relationships || []).filter((relationship) => {
+            if (FORWARD_RELATIONSHIPS.indexOf(relationship.type) >= 0) {
+                if (direction === relationship.direction) {
+                    return true;
+                }
+            }
+            if (INVERSE_RELATIONSHIPS.indexOf(relationship.type) >= 0) {
+                if (direction !== relationship.direction) {
+                    return true;
+                }
+            }
+            return false;
+        }),
+    ].map((relationship) => ({ entity: relationship.entity, type: relationship.entity.type } as EntityAndType));
 }

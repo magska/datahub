@@ -1,77 +1,35 @@
-mutation updateDataset($input: DatasetUpdateInput!) {
-    updateDataset(input: $input) {
-        ...nonRecursiveDatasetFields
-        downstreamLineage {
-            ...downstreamRelationshipFields
-        }
-        upstreamLineage {
-            ...upstreamRelationshipFields
+query getDataProfiles($urn: String!, $limit: Int, $startTime: Long, $endTime: Long) {
+    dataset(urn: $urn) {
+        urn
+        datasetProfiles(limit: $limit, startTimeMillis: $startTime, endTimeMillis: $endTime) {
+            rowCount
+            columnCount
+            timestampMillis
+            fieldProfiles {
+                fieldPath
+                uniqueCount
+                uniqueProportion
+                nullCount
+                nullProportion
+                min
+                max
+                mean
+                median
+                stdev
+                sampleValues
+            }
         }
     }
 }
 
 query getDataset($urn: String!) {
     dataset(urn: $urn) {
-        urn
-        name
-        type
-        origin
-        description
-        uri
-        platform {
-            name
-            info {
-                logoUrl
-            }
+        ...nonRecursiveDatasetFields
+        schemaMetadata(version: 0) {
+            ...schemaMetadataFields
         }
-        platformNativeType
-        tags
-        properties {
-            key
-            value
-        }
-        ownership {
-            ...ownershipFields
-        }
-        institutionalMemory {
-            elements {
-                url
-                author
-                description
-                created {
-                    actor
-                    time
-                }
-            }
-        }
-        schema {
-            datasetUrn
-            name
-            platformUrn
-            version
-            hash
-            platformSchema {
-                ... on TableSchema {
-                    schema
-                }
-                ... on KeyValueSchema {
-                    keySchema
-                    valueSchema
-                }
-            }
-            fields {
-                fieldPath
-                jsonPath
-                nullable
-                description
-                type
-                nativeDataType
-                recursive
-                globalTags {
-                    ...globalTagsFields
-                }
-            }
-            primaryKeys
+        previousSchemaMetadata: schemaMetadata(version: -1) {
+            ...schemaMetadataFields
         }
         editableSchemaMetadata {
             editableSchemaFieldInfo {
@@ -79,6 +37,9 @@ query getDataset($urn: String!) {
                 description
                 globalTags {
                     ...globalTagsFields
+                }
+                glossaryTerms {
+                    ...glossaryTerms
                 }
             }
         }
@@ -91,11 +52,82 @@ query getDataset($urn: String!) {
         globalTags {
             ...globalTagsFields
         }
-        downstreamLineage {
-            ...downstreamRelationshipFields
+        glossaryTerms {
+            ...glossaryTerms
         }
-        upstreamLineage {
-            ...upstreamRelationshipFields
+        subTypes {
+            typeNames
         }
+        usageStats(resource: $urn, range: MONTH) {
+            buckets {
+                bucket
+                duration
+                resource
+                metrics {
+                    uniqueUserCount
+                    totalSqlQueries
+                    topSqlQueries
+                }
+            }
+            aggregations {
+                uniqueUserCount
+                totalSqlQueries
+                users {
+                    user {
+                        urn
+                        username
+                    }
+                    count
+                    userEmail
+                }
+                fields {
+                    fieldName
+                    count
+                }
+            }
+        }
+        datasetProfiles(limit: 1) {
+            rowCount
+            columnCount
+            timestampMillis
+            fieldProfiles {
+                fieldPath
+                uniqueCount
+                uniqueProportion
+                nullCount
+                nullProportion
+                min
+                max
+                mean
+                median
+                stdev
+                sampleValues
+            }
+        }
+        incoming: relationships(
+            input: { types: ["DownstreamOf", "Consumes", "Produces"], direction: INCOMING, start: 0, count: 100 }
+        ) {
+            ...fullRelationshipResults
+        }
+        outgoing: relationships(
+            input: { types: ["DownstreamOf", "Consumes", "Produces"], direction: OUTGOING, start: 0, count: 100 }
+        ) {
+            ...fullRelationshipResults
+        }
+        ...viewProperties
+    }
+}
+
+mutation updateDataset($urn: String!, $input: DatasetUpdateInput!) {
+    updateDataset(urn: $urn, input: $input) {
+        urn
+    }
+}
+
+fragment viewProperties on Dataset {
+    viewProperties {
+        materialized
+        logic
+        language
     }
 }
