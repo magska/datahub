@@ -126,10 +126,12 @@ public class AuthenticationController extends Controller {
 
         final String actorUrn = new CorpuserUrn(username).toString();
         ctx().session().put(ACTOR, actorUrn);
+        //reverted this.
+        return ok().withCookies(Http.Cookie.builder(ACTOR, actorUrn)
+            .withHttpOnly(false)
+            .withMaxAge(Duration.of(30, ChronoUnit.DAYS))
+            .build());
 
-        return ok().withCookies(createActorCookie(DEFAULT_ACTOR_URN.toString(),
-                _configs.hasPath(SESSION_TTL_CONFIG_PATH) ? _configs.getInt(SESSION_TTL_CONFIG_PATH)
-                : DEFAULT_SESSION_TTL_HOURS));
     }
 
     private Result redirectToIdentityProvider() {
