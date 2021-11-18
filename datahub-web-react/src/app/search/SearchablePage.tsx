@@ -85,7 +85,7 @@ export const SearchablePage = ({ initialQuery, onSearch, onAutoComplete, childre
                 authenticatedUserPictureLink={user?.editableInfo?.pictureLink}
                 entityRegistry={entityRegistry}
             />
-            <BetaHeader />
+            {/* <BetaHeader /> */}
             <div style={styles.children}>{children}</div>
         </Layout>
     );
