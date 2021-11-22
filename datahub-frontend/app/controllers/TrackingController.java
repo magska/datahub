@@ -43,6 +43,9 @@ public class TrackingController extends Controller {
     private final KafkaProducer<String, String> _producer;
     private final String _topic;
 
+    private final List<String> SSL_PROTOCOLS = Collections.unmodifiableList(
+            Arrays.asList(SecurityProtocol.SSL.name(),SecurityProtocol.SASL_SSL.name()));
+
     @Inject
     public TrackingController(@Nonnull Config config) {
         _config = config;

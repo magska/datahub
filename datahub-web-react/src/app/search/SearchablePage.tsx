@@ -3,6 +3,7 @@ import { useHistory } from 'react-router';
 import { useTheme } from 'styled-components';
 
 import { SearchHeader } from './SearchHeader';
+import { BetaHeader } from './BetaHeader';
 import { useEntityRegistry } from '../useEntityRegistry';
 import { EntityType } from '../../types.generated';
 import { useGetAutoCompleteMultipleResultsLazyQuery } from '../../graphql/search.generated';
@@ -13,7 +14,7 @@ import analytics, { EventType } from '../analytics';
 const styles = {
     children: {
         flex: '1',
-        marginTop: 60,
+        marginTop: 120,
         display: 'flex',
         flexDirection: 'column' as const,
     },
@@ -88,6 +89,7 @@ export const SearchablePage = ({ initialQuery, onSearch, onAutoComplete, childre
                 authenticatedUserPictureLink={user?.editableInfo?.pictureLink}
                 entityRegistry={entityRegistry}
             />
+            <BetaHeader />
             <div style={styles.children}>{children}</div>
         </>
     );
