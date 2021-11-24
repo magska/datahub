@@ -9,12 +9,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.linkedin.util.Configuration;
 import com.linkedin.util.Pair;
 import com.typesafe.config.Config;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Play;
 import play.http.HttpEntity;
 import play.libs.ws.InMemoryBodyWritable;
@@ -40,6 +46,8 @@ import static auth.AuthUtils.*;
 
 
 public class Application extends Controller {
+
+  private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
   // TODO: Move to constants file.
   private static final String GMS_HOST_ENV_VAR = "DATAHUB_GMS_HOST";
@@ -120,6 +128,7 @@ public class Application extends Controller {
             .filter(entry -> !Http.HeaderNames.HOST.equals(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         )
+        .addHeader(Http.HeaderNames.HOST, getLocalHostname())
         .addHeader("X-DataHub-Principal", ctx().session().get(ACTOR)) // TODO: Replace with a token to GMS.
         .setBody(new InMemoryBodyWritable(ByteString.fromByteBuffer(request().body().asBytes().asByteBuffer()), "application/json"))
         .execute()
@@ -132,6 +141,15 @@ public class Application extends Controller {
           final HttpEntity body = new HttpEntity.Strict(apiResponse.getBodyAsBytes(), Optional.ofNullable(apiResponse.getContentType()));
           return new Result(header, body);
         }).toCompletableFuture();
+  }
+
+  private String getLocalHostname() {
+    try {
+      return InetAddress.getLocalHost().getCanonicalHostName();
+    } catch (UnknownHostException ex) {
+      logger.error("Could not determine the local hostname.", ex);
+    }
+    return "";
   }
 
   /**
