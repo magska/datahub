@@ -1,3 +1,7 @@
+---
+title: "metadata-service"
+---
+
 # DataHub Metadata Service (Also known as GMS)
 DataHub Metadata Service is a service written in Java consisting of multiple servlets: 
 
@@ -311,7 +315,7 @@ curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
             "urn":"urn:li:tag:Engineering",
             "aspects":[
                {
-                  "com.linkedin.dashboard.TagProperties":{
+                  "com.linkedin.tag.TagProperties":{
                      "name":"Engineering",
                      "description":"The tag will be assigned to all assets owned by the Eng org."
                   }
