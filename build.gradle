@@ -9,7 +9,8 @@ buildscript {
     classpath 'com.github.node-gradle:gradle-node-plugin:2.2.4'
     classpath 'com.commercehub.gradle.plugin:gradle-avro-plugin:0.8.1'
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE'
-    classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+    // Contains old log4j-core version
+    //classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
   }
 }
 
